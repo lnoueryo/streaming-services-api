@@ -1,13 +1,11 @@
-
-datasource db {
-  provider = "mysql"
-}
-
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
+datasource db {
+  provider = "mysql" // MariaDB も mysql 指定
+  url      = env("DATABASE_URL")
+}
 enum RoomPrivacy {
   public
   private
