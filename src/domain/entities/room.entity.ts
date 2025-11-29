@@ -1,5 +1,5 @@
 import { BaseEntity } from "./base.entity";
-type RoomPrivacy = 'public' | 'private'
+export type RoomPrivacy = 'public' | 'private'
 export class Room extends BaseEntity {
   readonly id: string;
   readonly privacy: RoomPrivacy;

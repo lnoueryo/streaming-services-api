@@ -1,8 +1,13 @@
 type Config = {
-
+  turnServerSecret: string
+  ttl: number
+}
+if (!process.env.TURN_SERVER_SECRET) {
+  throw new Error('invalid STAGE')
 }
 const config: Config = {
-
+  turnServerSecret: process.env.TURN_SERVER_SECRET,
+  ttl: Number(process.env.TURN_SERVER_TTL || 750), // 12.5 minutes
 }
 type ConfigEnv = {
   httpApiOrigin: string

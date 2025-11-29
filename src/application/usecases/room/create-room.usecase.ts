@@ -1,7 +1,7 @@
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common'
 import { IRoomRepository } from 'src/application/ports/repositories/room.repository'
 import { UseCaseResult } from 'src/application/ports/usecases/usecase-result'
-import { Room } from 'src/domain/entities/room.entity'
+import { GetTargetRoomDto } from './dto/get-target-room.dto'
 
 @Injectable()
 export class CreateRoomUseCase {
@@ -10,11 +10,11 @@ export class CreateRoomUseCase {
     private readonly roomRepository: IRoomRepository,
   ) {}
 
-  async do(): Promise<UseCaseResult<Room, 'internal'>> {
+  async do(): Promise<UseCaseResult<GetTargetRoomDto, 'internal'>> {
     try {
       const room = await this.roomRepository.create()
       return {
-        success: room
+        success: new GetTargetRoomDto(room)
       }
     } catch (error) {
       Logger.error(error)

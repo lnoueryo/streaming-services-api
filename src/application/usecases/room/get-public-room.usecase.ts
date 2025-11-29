@@ -1,7 +1,7 @@
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common'
 import { IRoomRepository } from 'src/application/ports/repositories/room.repository'
 import { UseCaseResult } from 'src/application/ports/usecases/usecase-result'
-import { Room } from 'src/domain/entities/room.entity'
+import { GetPublicRoomDto } from './dto/get-public-room.dto'
 
 @Injectable()
 export class GetPublicRoomUseCase {
@@ -12,13 +12,7 @@ export class GetPublicRoomUseCase {
 
   async do(params: { page: number, limit: number }): Promise<
     UseCaseResult<
-      {
-        rooms: Room[],
-        page: number,
-        limit: number,
-        total: number,
-        totalPages: number,
-      },
+      GetPublicRoomDto,
       'internal'
     >
   > {
@@ -29,13 +23,13 @@ export class GetPublicRoomUseCase {
         this.roomRepository.countRooms({ privacy: 'public'}),
       ])
       return {
-        success: {
+        success: new GetPublicRoomDto({
           rooms,
           page,
           limit,
           total,
           totalPages: Math.ceil(total / limit),
-        }
+        })
       }
     } catch (error) {
       Logger.error(error)

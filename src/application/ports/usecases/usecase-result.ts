@@ -1,7 +1,6 @@
-type CommonErrorCode =
+export type CommonErrorCode =
   | 'validation'
   | 'unauthorized'
-  | 'permission-denied'
   | 'forbidden'
   | 'internal'
   | 'not-found'
