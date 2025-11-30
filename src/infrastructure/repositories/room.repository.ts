@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { FindRoomParam, IRoomRepository } from 'src/application/ports/repositories/room.repository'
+import { FindRoomsParam, FindRoomParam, RoomWhere, IRoomRepository } from 'src/application/ports/repositories/room.repository'
 import { Room } from 'src/domain/entities/room.entity'
 import { IPrismaClient } from 'src/infrastructure/plugins/prisma'
 
@@ -8,7 +8,7 @@ export class RoomRepository implements IRoomRepository {
   constructor(
     @Inject('PRISMA') private readonly prisma: IPrismaClient,
   ) {}
-  async findRooms(params: FindRoomParam) {
+  async findRooms(params: FindRoomsParam) {
     const rooms = await this.prisma.room.findMany({
       where: { privacy: params.privacy },
       skip: (params.page - 1) * params.limit,
@@ -17,7 +17,15 @@ export class RoomRepository implements IRoomRepository {
     })
     return rooms.map(room => new Room(room))
   }
-  async countRooms(params: FindRoomParam) {
+  async findRoom(params: FindRoomParam): Promise<Room> {
+    const room = await this.prisma.room.findFirst({
+      where: {
+        id: params.id
+      }
+    })
+    return new Room(room)
+  }
+  async countRooms(params: RoomWhere) {
     return await this.prisma.room.count({
       where: {
         privacy: params.privacy
