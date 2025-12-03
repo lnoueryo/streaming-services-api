@@ -17,13 +17,13 @@ export class RoomRepository implements IRoomRepository {
     })
     return rooms.map(room => new Room(room))
   }
-  async findRoom(params: FindRoomParam): Promise<Room> {
+  async findRoom(params: FindRoomParam): Promise<Room | null> {
     const room = await this.prisma.room.findFirst({
       where: {
         id: params.id
       }
     })
-    return new Room(room)
+    return room ? new Room(room) : room
   }
   async countRooms(params: RoomWhere) {
     return await this.prisma.room.count({

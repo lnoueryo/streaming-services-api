@@ -1,18 +1,18 @@
-import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { UseCaseResult } from 'src/application/ports/usecases/usecase-result'
 import { createHmac } from 'crypto'
-import output from 'src/config'
 import { GenerateTurnCredentialDto } from './dto/generate-turn-credential.dto'
+import config from 'src/config';
 @Injectable()
 export class GenerateTurnCredentialUseCase {
   constructor() {}
 
   do(userId: string): UseCaseResult<GenerateTurnCredentialDto, 'internal'> {
     try {
-    const ttl = output.ttl
+    const ttl = config.ttl
     const timestamp = Math.floor(Date.now() / 1000) + ttl
     const username = `${timestamp}:${userId}`
-    const hmac = createHmac("sha1", output.turnServerSecret)
+    const hmac = createHmac("sha1", config.turnServerSecret)
     hmac.update(username)
     const password = hmac.digest("base64")
 

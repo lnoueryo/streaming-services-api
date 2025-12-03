@@ -1,16 +1,11 @@
-export type CommonErrorCode =
-  | 'validation'
-  | 'unauthorized'
-  | 'forbidden'
-  | 'internal'
-  | 'not-found'
-  | 'too-many-requests'
+import { CommonErrorCode } from "./usecase-error"
 
 export type UseCaseResult<T, U extends CommonErrorCode> =
   | {
       error: {
         type: U
         message: string
+        errorCode?: string
       }
     }
   | { success: T }

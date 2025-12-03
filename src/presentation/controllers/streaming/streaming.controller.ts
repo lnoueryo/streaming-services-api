@@ -1,11 +1,11 @@
-import { Controller, HttpException, Post } from '@nestjs/common'
+import { Controller, Post } from '@nestjs/common'
 import { ApiTags, ApiResponse } from '@nestjs/swagger'
 import { AuthUser } from '../../interceptors/auth-user.decorator'
 import { Room } from 'src/domain/entities/room.entity'
 import { AuthUserRequest } from '../shared/auth.request'
 import { GenerateTurnCredentialUseCase } from 'src/application/usecases/streaming/generate-turn-credential.usecase'
-import { getHttpStatus } from '../shared/http-status-mapper'
 import { GenerateTurnCredentialResponse } from './response/generate-turn-credential.response'
+import { HttpErrorCodeException } from '../shared/http-exception'
 
 @ApiTags('streaming')
 @Controller({
@@ -22,7 +22,7 @@ export class StreamingController {
   ) {
     const result = this.generateTurnCredentialUseCase.do(user.id)
     if ('error' in result) {
-      throw  new HttpException(result.error.message, getHttpStatus(result.error.type))
+      throw  new HttpErrorCodeException(result.error)
     }
     return new GenerateTurnCredentialResponse(result.success)
   }

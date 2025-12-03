@@ -5,20 +5,36 @@ import { CreateRoomUseCase } from 'src/application/usecases/room/create-room.use
 import { RoomController } from 'src/presentation/controllers/room/room.controller'
 import { RoomRepository } from 'src/infrastructure/repositories/room.repository'
 import { prisma } from '../../../infrastructure/plugins/prisma'
+import { JoinRoomUseCase } from 'src/application/usecases/room/join-room.usecase'
+import { ISignalingGateway } from 'src/application/ports/gateways/signaling.gatway'
+import { SignalingGateway } from 'src/infrastructure/gateways/signaling.gateway'
+import { SignalingHttpClient } from 'src/infrastructure/http/signaling-client'
+import { RejoinRoomUseCase } from 'src/application/usecases/room/rejoin-room.usecase'
+
 @Module({
   controllers: [RoomController],
   providers: [
     CreateRoomUseCase,
     GetPublicRoomUseCase,
+    JoinRoomUseCase,
+    RejoinRoomUseCase,
+    SignalingHttpClient,
     {
       provide: IRoomRepository,
       useClass: RoomRepository,
+    },
+    {
+      provide: ISignalingGateway,
+      useClass: SignalingGateway,
     },
     {
       provide: 'PRISMA',
       useValue: prisma,
     },
   ],
-  exports: [IRoomRepository],
+  exports: [
+    IRoomRepository,
+    ISignalingGateway,
+  ],
 })
 export class RoomModule {}

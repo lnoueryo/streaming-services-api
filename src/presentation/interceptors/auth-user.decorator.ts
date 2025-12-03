@@ -28,11 +28,12 @@ const authByCookieSession = async(req) => {
   }
 
   try {
-    const decodedToken = await auth.verifySessionCookie(sessionCookie, true);
+    const decodedSession = await auth.verifySessionCookie(sessionCookie, true);
     const user = new AuthUserRequest({
-      id: decodedToken.uid,
-      email: decodedToken.email,
-      name: decodedToken.name,
+      id: decodedSession.uid,
+      email: decodedSession.email,
+      name: decodedSession.name,
+      session: sessionCookie,
     })
     req.user = user
     return user;
@@ -56,6 +57,7 @@ const authByAuthorization = async(req) => {
       id: decodedToken.uid,
       email: decodedToken.email,
       name: decodedToken.name,
+      token: decodedToken.name,
     })
     req.user = user
     return user

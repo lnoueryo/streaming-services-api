@@ -1,4 +1,4 @@
-import { CommonErrorCode } from '../../../application/ports/usecases/usecase-result'
+import { CommonErrorCode } from '../../../application/ports/usecases/usecase-error'
 
 
 export function getHttpStatus(code: CommonErrorCode): number {
@@ -7,6 +7,7 @@ export function getHttpStatus(code: CommonErrorCode): number {
     'unauthorized': 401,
     'forbidden': 403,
     'not-found': 404,
+    'conflict': 409,
     'too-many-requests': 429,
     'internal': 500,
   }

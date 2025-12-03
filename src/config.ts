@@ -10,19 +10,16 @@ const config: Config = {
   ttl: Number(process.env.TURN_SERVER_TTL || 750), // 12.5 minutes
 }
 type ConfigEnv = {
-  httpApiOrigin: string
-  websocketApiOrigin: string
+  signalingApiOrigin: string
 }
 type STAGE = 'development' | 'production'
 
 const configEnvs: { [K in STAGE]: ConfigEnv } = {
   development: {
-    httpApiOrigin: 'http://localhost:3001',
-    websocketApiOrigin: 'ws://localhost:3001',
+    signalingApiOrigin: 'http://localhost:8080',
   },
   production: {
-    httpApiOrigin: 'https://pele-server.jounetsism.biz',
-    websocketApiOrigin: 'wss://pele-server.jounetsism.biz',
+    signalingApiOrigin: 'https://streaming-signaling.jounetsism.biz',
   },
 }
 const env = (process.env.NODE_ENV || 'development') as STAGE
