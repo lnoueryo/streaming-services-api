@@ -57,7 +57,7 @@ const authByAuthorization = async(req) => {
       id: decodedToken.uid,
       email: decodedToken.email,
       name: decodedToken.name,
-      token: decodedToken.name,
+      token,
     })
     req.user = user
     return user
