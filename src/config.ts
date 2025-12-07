@@ -16,7 +16,7 @@ type STAGE = 'development' | 'production'
 
 const configEnvs: { [K in STAGE]: ConfigEnv } = {
   development: {
-    signalingApiOrigin: 'http://localhost:8080',
+    signalingApiOrigin: 'http://streaming-signaling:8080',
   },
   production: {
     signalingApiOrigin: 'https://streaming-signaling.jounetsism.biz',

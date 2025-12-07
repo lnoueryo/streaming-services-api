@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common'
+import { Controller, Get, Param, Post, Put, Query } from '@nestjs/common'
 import { ApiTags, ApiResponse } from '@nestjs/swagger'
 import { AuthUser } from '../../interceptors/auth-user.decorator'
 import { GetPublicRoomUseCase } from 'src/application/usecases/room/get-public-room.usecase'
