@@ -10,15 +10,18 @@ const config: Config = {
   ttl: Number(process.env.TURN_SERVER_TTL || 750), // 12.5 minutes
 }
 type ConfigEnv = {
+  allowOrigin: string
   signalingApiOrigin: string
 }
 type STAGE = 'development' | 'production'
 
 const configEnvs: { [K in STAGE]: ConfigEnv } = {
   development: {
+    allowOrigin: 'https://streaming.localtest.me',
     signalingApiOrigin: 'http://streaming-signaling:8080',
   },
   production: {
+    allowOrigin: 'https://streaming.jounetsism.biz',
     signalingApiOrigin: 'https://streaming-signaling.jounetsism.biz',
   },
 }

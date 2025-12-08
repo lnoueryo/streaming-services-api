@@ -1,8 +1,8 @@
-import { SignalingClient } from "src/domain/entities/signaling-client.entity"
+import { SignalingRoom } from "src/domain/entities/signaling-room.entity"
 
 export const ISignalingGateway = Symbol('ISignalingGateway')
 
 export type ISignalingGateway = {
-  checkIfCanJoin: (params: { roomId: string, user: { id: string, token: string } }) => Promise<SignalingClient | null>
+  getRoom: (params: { roomId: string, user: { id: string, token: string } }) => Promise<SignalingRoom | null>
   deleteRtcClient: (params: { roomId: string, user: { id: string, token: string } }) => Promise<void>
 }

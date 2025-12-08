@@ -8,9 +8,10 @@ import { GetPublicRoomRequest } from './request/get-public-room.request'
 import { GetPublicRoomResponse } from './response/get-public-room.response'
 import { GetTargetRoomResponse } from './response/get-target-room.response'
 import { AuthUserRequest } from '../shared/auth.request'
-import { JoinRoomUseCase } from 'src/application/usecases/room/join-room.usecase'
+import { EnterLobbyUseCase } from 'src/application/usecases/room/enter-lobby.usecase'
 import { HttpErrorCodeException } from '../shared/http-exception'
 import { RejoinRoomUseCase } from 'src/application/usecases/room/rejoin-room.usecase'
+import { EnterLobbyResponse } from './response/enter-lobby.response'
 
 @ApiTags('rooms')
 @Controller({
@@ -20,7 +21,7 @@ export class RoomController {
   constructor(
     private readonly getPublicRoomUseCase: GetPublicRoomUseCase,
     private readonly createRoomUseCase: CreateRoomUseCase,
-    private readonly joinRoomUseCase: JoinRoomUseCase,
+    private readonly enterLobbyUseCase: EnterLobbyUseCase,
     private readonly rejoinRoomUseCase: RejoinRoomUseCase,
   ) {}
   @Get('/public')
@@ -48,15 +49,15 @@ export class RoomController {
   }
   @Put('/:id/join')
   @ApiResponse({ status: 200, type: GetTargetRoomResponse })
-  async joinRoom(
+  async enterLobby(
     @Param('id') roomId: string,
     @AuthUser() user: AuthUserRequest,
   ): Promise<GetTargetRoomResponse> {
-    const result = await this.joinRoomUseCase.do({ roomId, user })
+    const result = await this.enterLobbyUseCase.do({ roomId, user })
     if ('error' in result) {
       throw  new HttpErrorCodeException(result.error)
     }
-    return new GetTargetRoomResponse(result.success)
+    return new EnterLobbyResponse(result.success)
   }
   @Put('/:id/join/replace')
   @ApiResponse({ status: 200, type: GetTargetRoomResponse })

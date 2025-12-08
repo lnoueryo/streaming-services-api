@@ -8,6 +8,7 @@ export const SignalingHttpClient: Provider = {
   useFactory: () => {
     const axios = AxiosFactory.create({
       baseURL: config.signalingApiOrigin,
+      validateStatus: (_) => true
     })
     return new HttpService(axios);
   },

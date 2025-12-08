@@ -1,13 +1,13 @@
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common'
 import { IRoomRepository } from 'src/application/ports/repositories/room.repository'
 import { UseCaseResult } from 'src/application/ports/usecases/usecase-result'
-import { GetTargetRoomDto } from './dto/get-target-room.dto'
 import { ISignalingGateway } from 'src/application/ports/gateways/signaling.gatway'
-import axios from 'axios'
+import { isAxiosError } from 'axios'
+import { EnterLobbyDto } from './dto/enter-lobby.dto'
 import { UseCaseError } from 'src/application/ports/usecases/usecase-error'
 
 @Injectable()
-export class JoinRoomUseCase {
+export class EnterLobbyUseCase {
   constructor(
     @Inject(forwardRef(() => IRoomRepository))
     private readonly roomRepository: IRoomRepository,
@@ -17,10 +17,8 @@ export class JoinRoomUseCase {
 
   async do(params: { roomId: string, user: { id: string, token: string } }): Promise<
     UseCaseResult<
-      GetTargetRoomDto,
+      EnterLobbyDto,
       'not-found' |
-      'unauthorized' |
-      'conflict' |
       'internal'
     >
   > {
@@ -34,29 +32,34 @@ export class JoinRoomUseCase {
           },
         }
       }
-      await this.signalingGateway.checkIfCanJoin(params)
-      return {
-        success: new GetTargetRoomDto(room)
+      try {
+
+        const runtimeRoom = await this.signalingGateway.getRoom(params)
+        return {
+          success: new EnterLobbyDto(
+            {
+              ...room,
+              ...runtimeRoom,
+            },
+            params.user
+          )
+        }
+      } catch (error) {
+        if (error instanceof UseCaseError) {
+          if (error.type === 'not-found') {
+            return {
+              success: new EnterLobbyDto(
+                {
+                  ...room,
+                },
+                params.user
+              )
+            }
+          }
+        }
+        throw error
       }
     } catch (error) {
-      if (error instanceof UseCaseError) {
-        if (error.type === 'unauthorized') {
-          return {
-            error: {
-              type: error.type,
-              message: error.message,
-            }
-          }
-        }
-        if (error.type === 'conflict') {
-          return {
-            error: {
-              type: error.type,
-              message: error.message,
-            }
-          }
-        }
-      }
       Logger.error(error)
       return {
         error: {

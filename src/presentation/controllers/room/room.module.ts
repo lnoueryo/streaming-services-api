@@ -5,7 +5,7 @@ import { CreateRoomUseCase } from 'src/application/usecases/room/create-room.use
 import { RoomController } from 'src/presentation/controllers/room/room.controller'
 import { RoomRepository } from 'src/infrastructure/repositories/room.repository'
 import { prisma } from '../../../infrastructure/plugins/prisma'
-import { JoinRoomUseCase } from 'src/application/usecases/room/join-room.usecase'
+import { EnterLobbyUseCase } from 'src/application/usecases/room/enter-lobby.usecase'
 import { ISignalingGateway } from 'src/application/ports/gateways/signaling.gatway'
 import { SignalingGateway } from 'src/infrastructure/gateways/signaling.gateway'
 import { SignalingHttpClient } from 'src/infrastructure/http/signaling-client'
@@ -16,7 +16,7 @@ import { RejoinRoomUseCase } from 'src/application/usecases/room/rejoin-room.use
   providers: [
     CreateRoomUseCase,
     GetPublicRoomUseCase,
-    JoinRoomUseCase,
+    EnterLobbyUseCase,
     RejoinRoomUseCase,
     SignalingHttpClient,
     {

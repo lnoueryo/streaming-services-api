@@ -19,17 +19,20 @@ export class AxiosFactory {
   static create(config: AxiosRequestConfig): AxiosInstance {
     const instance = axios.create(config);
     instance.interceptors.response.use(
-      res => res,
-      (error) => {
-        if (axios.isAxiosError(error)) {
-          const status = error.response?.status ?? 0;
-          const message = error.response?.data?.message ?? error.message;
+      res => {
+        if (res.status >= 400) {
+          const status = res?.status ?? 0;
+          const message = res?.data?.message ?? '';
+          const code = res?.data?.code ?? '';
           throw new UseCaseError({
             type: toCommonErrorCode(status),
             message,
-            code: error.code,
+            code,
           });
         }
+        return res
+      },
+      (error) => {
         throw error;
       }
     );
