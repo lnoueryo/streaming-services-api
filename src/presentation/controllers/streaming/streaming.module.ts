@@ -3,8 +3,6 @@ import { StreamingController } from 'src/presentation/controllers/streaming/stre
 import { GenerateTurnCredentialUseCase } from 'src/application/usecases/streaming/generate-turn-credential.usecase'
 @Module({
   controllers: [StreamingController],
-  providers: [
-    GenerateTurnCredentialUseCase,
-  ],
+  providers: [GenerateTurnCredentialUseCase]
 })
 export class StreamingModule {}

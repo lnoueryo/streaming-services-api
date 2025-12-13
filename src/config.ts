@@ -7,7 +7,7 @@ if (!process.env.TURN_SERVER_SECRET) {
 }
 const config: Config = {
   turnServerSecret: process.env.TURN_SERVER_SECRET,
-  ttl: Number(process.env.TURN_SERVER_TTL || 750), // 12.5 minutes
+  ttl: Number(process.env.TURN_SERVER_TTL || 750) // 12.5 minutes
 }
 type ConfigEnv = {
   allowOrigin: string
@@ -18,12 +18,12 @@ type STAGE = 'development' | 'production'
 const configEnvs: { [K in STAGE]: ConfigEnv } = {
   development: {
     allowOrigin: 'https://streaming.localtest.me',
-    signalingApiOrigin: 'http://streaming-signaling:8080',
+    signalingApiOrigin: 'http://streaming-signaling:8080'
   },
   production: {
     allowOrigin: 'https://streaming.jounetsism.biz',
-    signalingApiOrigin: 'https://streaming-signaling.jounetsism.biz',
-  },
+    signalingApiOrigin: 'https://streaming-signaling.jounetsism.biz'
+  }
 }
 const env = (process.env.NODE_ENV || 'development') as STAGE
 const envList = ['development', 'production']
@@ -34,6 +34,6 @@ const configEnv = configEnvs[env]
 const output = {
   ...config,
   ...configEnv,
-  env,
+  env
 }
 export default output

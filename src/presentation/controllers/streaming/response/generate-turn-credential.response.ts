@@ -5,14 +5,14 @@ export class GenerateTurnCredentialResponse {
   urls: string[]
 
   constructor(params: {
-    username: string,
-    credential: string,
-    ttl: number,
-    urls: string[],
+    username: string
+    credential: string
+    ttl: number
+    urls: string[]
   }) {
-    this.username = params.username;
-    this.credential = params.credential;
-    this.ttl = params.ttl;
-    this.urls = params.urls;
+    this.username = params.username
+    this.credential = params.credential
+    this.ttl = params.ttl
+    this.urls = params.urls
   }
 }

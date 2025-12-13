@@ -1,11 +1,8 @@
 import { Module } from '@nestjs/common'
-import { RoomModule } from './presentation/controllers/room/room.module'
+import { SpaceModule } from './presentation/controllers/space/space.module'
 import { StreamingModule } from './presentation/controllers/streaming/streaming.module'
 
 @Module({
-  imports: [
-    RoomModule,
-    StreamingModule,
-  ],
+  imports: [SpaceModule, StreamingModule]
 })
 export class AppModule {}

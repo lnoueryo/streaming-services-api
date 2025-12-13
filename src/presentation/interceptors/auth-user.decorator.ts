@@ -2,12 +2,10 @@ import {
   createParamDecorator,
   ExecutionContext,
   Logger,
-  UnauthorizedException,
+  UnauthorizedException
 } from '@nestjs/common'
 import { auth } from '../../infrastructure/plugins/firebase-admin'
 import { AuthUserRequest } from '../controllers/shared/auth.request'
-
-
 
 export const AuthUser = createParamDecorator(
   async (_data: unknown, ctx: ExecutionContext) => {
@@ -17,33 +15,33 @@ export const AuthUser = createParamDecorator(
       return user
     }
     return await authByAuthorization(request)
-  },
+  }
 )
 
-const authByCookieSession = async(req) => {
-  const sessionCookie = req.cookies?.session;
+const authByCookieSession = async (req) => {
+  const sessionCookie = req.cookies?.session
 
   if (!sessionCookie) {
     return null
   }
 
   try {
-    const decodedSession = await auth.verifySessionCookie(sessionCookie, true);
+    const decodedSession = await auth.verifySessionCookie(sessionCookie, true)
     const user = new AuthUserRequest({
       id: decodedSession.uid,
       email: decodedSession.email,
       name: decodedSession.name,
-      session: sessionCookie,
+      session: sessionCookie
     })
     req.user = user
-    return user;
+    return user
   } catch (err) {
     Logger.warn(err)
     return null
   }
 }
 
-const authByAuthorization = async(req) => {
+const authByAuthorization = async (req) => {
   const authHeader = req.headers.authorization
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     throw new UnauthorizedException('No token provided')
@@ -57,7 +55,7 @@ const authByAuthorization = async(req) => {
       id: decodedToken.uid,
       email: decodedToken.email,
       name: decodedToken.name,
-      token,
+      token
     })
     req.user = user
     return user

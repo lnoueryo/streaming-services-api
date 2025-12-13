@@ -1,44 +1,41 @@
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common'
-import { IRoomRepository } from 'src/application/ports/repositories/room.repository'
+import { ISpaceRepository } from 'src/application/ports/repositories/space.repository'
 import { UseCaseResult } from 'src/application/ports/usecases/usecase-result'
 import { ISignalingGateway } from 'src/application/ports/gateways/signaling.gatway'
-import { isAxiosError } from 'axios'
-import { EnterLobbyDto } from './dto/enter-lobby.dto'
+import { GetRoomDto } from './dto/get-room.dto'
 import { UseCaseError } from 'src/application/ports/usecases/usecase-error'
 
 @Injectable()
 export class EnterLobbyUseCase {
   constructor(
-    @Inject(forwardRef(() => IRoomRepository))
-    private readonly roomRepository: IRoomRepository,
+    @Inject(forwardRef(() => ISpaceRepository))
+    private readonly spaceRepository: ISpaceRepository,
     @Inject(forwardRef(() => ISignalingGateway))
-    private readonly signalingGateway: ISignalingGateway,
+    private readonly signalingGateway: ISignalingGateway
   ) {}
 
-  async do(params: { roomId: string, user: { id: string, token: string } }): Promise<
-    UseCaseResult<
-      EnterLobbyDto,
-      'not-found' |
-      'internal'
-    >
-  > {
+  async do(params: {
+    spaceId: string
+    user: { id: string; token: string }
+  }): Promise<UseCaseResult<GetRoomDto, 'not-found' | 'internal'>> {
     try {
-      const room = await this.roomRepository.findRoom({ id: params.roomId })
-      if (!room) {
+      const space = await this.spaceRepository.findSpace({ id: params.spaceId })
+      if (!space) {
         return {
           error: {
             type: 'not-found',
-            message: '部屋が存在しません',
-          },
+            message: 'スペースが存在しません'
+          }
         }
       }
       try {
-        const runtimeRoom = await this.signalingGateway.getRoom(params)
+        const room = await this.signalingGateway.getRoom(params)
         return {
-          success: new EnterLobbyDto(
+          success: new GetRoomDto(
             {
-              ...room,
-              ...runtimeRoom,
+              id: space.id,
+              privacy: space.privacy,
+              participants: room.participants
             },
             params.user
           )
@@ -47,9 +44,11 @@ export class EnterLobbyUseCase {
         if (error instanceof UseCaseError) {
           if (error.type === 'not-found') {
             return {
-              success: new EnterLobbyDto(
+              success: new GetRoomDto(
                 {
-                  ...room,
+                  id: space.id,
+                  privacy: space.privacy,
+                  participants: []
                 },
                 params.user
               )
@@ -63,7 +62,7 @@ export class EnterLobbyUseCase {
       return {
         error: {
           type: 'internal',
-          message: 'Internal Server Error',
+          message: 'Internal Server Error'
         }
       }
     }

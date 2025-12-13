@@ -1,6 +1,4 @@
-import { BaseEntity } from './base.entity'
-
-export class User extends BaseEntity {
+export class Participant {
   readonly id: string
   readonly name: string
   readonly email: string
@@ -11,10 +9,7 @@ export class User extends BaseEntity {
     name: string
     email: string
     image: string
-    createdAt?: Date
-    updatedAt?: Date
   }) {
-    super(params)
     this.id = params.id
     this.name = params.name
     this.email = params.email
