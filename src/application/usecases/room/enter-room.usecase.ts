@@ -3,11 +3,11 @@ import { IRoomRepository } from 'src/application/ports/repositories/room.reposit
 import { UseCaseResult } from 'src/application/ports/usecases/usecase-result'
 import { GetTargetRoomDto } from './dto/get-target-room.dto'
 import { ISignalingGateway } from 'src/application/ports/gateways/signaling.gatway'
-import axios from 'axios'
 import { UseCaseError } from 'src/application/ports/usecases/usecase-error'
+import { EnterLobbyDto } from './dto/enter-lobby.dto'
 
 @Injectable()
-export class RejoinRoomUseCase {
+export class EnterRoomUseCase {
   constructor(
     @Inject(forwardRef(() => IRoomRepository))
     private readonly roomRepository: IRoomRepository,
@@ -15,11 +15,10 @@ export class RejoinRoomUseCase {
     private readonly signalingGateway: ISignalingGateway,
   ) {}
 
-  async do(params: { roomId: string, user: { id: string, token: string } }): Promise<
+  async do(params: { roomId: string, user: { id: string, token: string }, body: { force?: boolean} }): Promise<
     UseCaseResult<
-      GetTargetRoomDto,
+      EnterLobbyDto,
       'not-found' |
-      'unauthorized' |
       'internal'
     >
   > {
@@ -34,31 +33,35 @@ export class RejoinRoomUseCase {
         }
       }
       try {
-        await this.signalingGateway.deleteRtcClient(params)
+        if (params.body.force) {
+          const runtimeRoom = await this.signalingGateway.deleteRtcClient(params)
+        }
+        const runtimeRoom = await this.signalingGateway.getRoom(params)
+        return {
+          success: new EnterLobbyDto(
+            {
+              ...room,
+              ...runtimeRoom,
+            },
+            params.user
+          )
+        }
       } catch (error) {
         if (error instanceof UseCaseError) {
           if (error.type === 'not-found') {
             return {
-              success: new GetTargetRoomDto(room)
+              success: new EnterLobbyDto(
+                {
+                  ...room,
+                },
+                params.user
+              )
             }
           }
         }
         throw error
       }
-      return {
-        success: new GetTargetRoomDto(room)
-      }
     } catch (error) {
-      if (error instanceof UseCaseError) {
-        if (error.type === 'unauthorized') {
-          return {
-            error: {
-              type: error.type,
-              message: error.message,
-            }
-          }
-        }
-      }
       Logger.error(error)
       return {
         error: {

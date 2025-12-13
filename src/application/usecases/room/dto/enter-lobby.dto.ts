@@ -14,6 +14,6 @@ export class EnterLobbyDto extends GetTargetRoomDto {
     }
   ) {
     super(params)
-    this.isJoined = params.users?.some((user) => user.id === requestUser.id)
+    this.isJoined = params.users.some((user) => user.id === requestUser.id)
   }
 }

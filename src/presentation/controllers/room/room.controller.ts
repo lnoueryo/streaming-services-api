@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, Put, Query } from '@nestjs/common'
+import { Body, Controller, Get, Param, Patch, Post, Put, Query } from '@nestjs/common'
 import { ApiTags, ApiResponse } from '@nestjs/swagger'
 import { AuthUser } from '../../interceptors/auth-user.decorator'
 import { GetPublicRoomUseCase } from 'src/application/usecases/room/get-public-room.usecase'
@@ -10,7 +10,7 @@ import { GetTargetRoomResponse } from './response/get-target-room.response'
 import { AuthUserRequest } from '../shared/auth.request'
 import { EnterLobbyUseCase } from 'src/application/usecases/room/enter-lobby.usecase'
 import { HttpErrorCodeException } from '../shared/http-exception'
-import { RejoinRoomUseCase } from 'src/application/usecases/room/rejoin-room.usecase'
+import { EnterRoomUseCase } from 'src/application/usecases/room/enter-room.usecase'
 import { EnterLobbyResponse } from './response/enter-lobby.response'
 
 @ApiTags('rooms')
@@ -22,7 +22,7 @@ export class RoomController {
     private readonly getPublicRoomUseCase: GetPublicRoomUseCase,
     private readonly createRoomUseCase: CreateRoomUseCase,
     private readonly enterLobbyUseCase: EnterLobbyUseCase,
-    private readonly rejoinRoomUseCase: RejoinRoomUseCase,
+    private readonly enterRoomUseCase: EnterRoomUseCase,
   ) {}
   @Get('/public')
   @ApiResponse({ status: 200, type: Room })
@@ -47,28 +47,29 @@ export class RoomController {
     }
     return new GetTargetRoomResponse(result.success)
   }
-  @Put('/:id/join')
-  @ApiResponse({ status: 200, type: GetTargetRoomResponse })
+  @Get('/:id/lobby')
+  @ApiResponse({ status: 200, type: EnterLobbyResponse })
   async enterLobby(
     @Param('id') roomId: string,
     @AuthUser() user: AuthUserRequest,
-  ): Promise<GetTargetRoomResponse> {
+  ): Promise<EnterLobbyResponse> {
     const result = await this.enterLobbyUseCase.do({ roomId, user })
     if ('error' in result) {
       throw  new HttpErrorCodeException(result.error)
     }
     return new EnterLobbyResponse(result.success)
   }
-  @Put('/:id/join/replace')
-  @ApiResponse({ status: 200, type: GetTargetRoomResponse })
-  async rejoinRoom(
+  @Patch('/:id/room')
+  @ApiResponse({ status: 200, type: EnterLobbyResponse })
+  async enterRoom(
     @Param('id') roomId: string,
     @AuthUser() user: AuthUserRequest,
-  ): Promise<GetTargetRoomResponse> {
-    const result = await this.rejoinRoomUseCase.do({ roomId, user })
+    @Body() body: { force?: boolean },
+  ): Promise<EnterLobbyResponse> {
+    const result = await this.enterRoomUseCase.do({ roomId, user, body })
     if ('error' in result) {
       throw  new HttpErrorCodeException(result.error)
     }
-    return new GetTargetRoomResponse(result.success)
+    return new EnterLobbyResponse(result.success)
   }
 }

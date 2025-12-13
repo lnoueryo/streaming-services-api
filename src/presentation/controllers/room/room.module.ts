@@ -9,7 +9,7 @@ import { EnterLobbyUseCase } from 'src/application/usecases/room/enter-lobby.use
 import { ISignalingGateway } from 'src/application/ports/gateways/signaling.gatway'
 import { SignalingGateway } from 'src/infrastructure/gateways/signaling.gateway'
 import { SignalingHttpClient } from 'src/infrastructure/http/signaling-client'
-import { RejoinRoomUseCase } from 'src/application/usecases/room/rejoin-room.usecase'
+import { EnterRoomUseCase } from 'src/application/usecases/room/enter-room.usecase'
 
 @Module({
   controllers: [RoomController],
@@ -17,7 +17,7 @@ import { RejoinRoomUseCase } from 'src/application/usecases/room/rejoin-room.use
     CreateRoomUseCase,
     GetPublicRoomUseCase,
     EnterLobbyUseCase,
-    RejoinRoomUseCase,
+    EnterRoomUseCase,
     SignalingHttpClient,
     {
       provide: IRoomRepository,

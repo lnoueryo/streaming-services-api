@@ -33,7 +33,6 @@ export class EnterLobbyUseCase {
         }
       }
       try {
-
         const runtimeRoom = await this.signalingGateway.getRoom(params)
         return {
           success: new EnterLobbyDto(
