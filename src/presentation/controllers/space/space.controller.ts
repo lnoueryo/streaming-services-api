@@ -20,7 +20,7 @@ import { AuthUserRequest } from '../shared/auth.request'
 import { EnterLobbyUseCase } from 'src/application/usecases/space/enter-lobby.usecase'
 import { HttpErrorCodeException } from '../shared/http-exception'
 import { EnterRoomUseCase } from 'src/application/usecases/space/enter-room.usecase'
-import { EnterLobbyResponse } from './response/enter-lobby.response'
+import { GetRoomResponse } from './response/get-room.response'
 
 @ApiTags('spaces')
 @Controller({
@@ -57,28 +57,28 @@ export class SpaceController {
     return new GetTargetSpaceResponse(result.success)
   }
   @Get('/:id/lobby')
-  @ApiResponse({ status: 200, type: EnterLobbyResponse })
+  @ApiResponse({ status: 200, type: GetRoomResponse })
   async enterLobby(
     @Param('id') spaceId: string,
     @AuthUser() user: AuthUserRequest
-  ): Promise<EnterLobbyResponse> {
+  ): Promise<GetRoomResponse> {
     const result = await this.enterLobbyUseCase.do({ spaceId, user })
     if ('error' in result) {
       throw new HttpErrorCodeException(result.error)
     }
-    return new EnterLobbyResponse(result.success)
+    return new GetRoomResponse(result.success)
   }
   @Patch('/:id/room')
-  @ApiResponse({ status: 200, type: EnterLobbyResponse })
+  @ApiResponse({ status: 200, type: GetRoomResponse })
   async enterRoom(
     @Param('id') spaceId: string,
     @AuthUser() user: AuthUserRequest,
     @Body() body: { force?: boolean }
-  ): Promise<EnterLobbyResponse> {
+  ): Promise<GetRoomResponse> {
     const result = await this.enterRoomUseCase.do({ spaceId, user, body })
     if ('error' in result) {
       throw new HttpErrorCodeException(result.error)
     }
-    return new EnterLobbyResponse(result.success)
+    return new GetRoomResponse(result.success)
   }
 }
