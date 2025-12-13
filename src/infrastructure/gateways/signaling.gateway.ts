@@ -12,7 +12,7 @@ export class SignalingGateway implements ISignalingGateway {
     spaceId: string
     user: { id: string; token?: string; session?: string }
   }): Promise<Room> {
-    const resp = await this.http.axiosRef.get<{ id: string }>(
+    const resp = await this.http.axiosRef.get(
       `/room/${params.spaceId}/user`,
       {
         headers: {
