@@ -9,7 +9,7 @@ import { EnterLobbyUseCase } from 'src/application/usecases/space/enter-lobby.us
 import { ISignalingGateway } from 'src/application/ports/gateways/signaling.gatway'
 import { SignalingGateway } from 'src/infrastructure/gateways/signaling.gateway'
 import { SignalingHttpClient } from 'src/infrastructure/http/signaling-client'
-import { EnterRoomUseCase } from 'src/application/usecases/space/enter-room.usecase'
+import { EnableEntryUseCase } from 'src/application/usecases/space/enable-entry.usecase'
 
 @Module({
   controllers: [SpaceController],
@@ -17,7 +17,7 @@ import { EnterRoomUseCase } from 'src/application/usecases/space/enter-room.usec
     CreateSpaceUseCase,
     GetPublicSpaceUseCase,
     EnterLobbyUseCase,
-    EnterRoomUseCase,
+    EnableEntryUseCase,
     SignalingHttpClient,
     {
       provide: ISpaceRepository,

@@ -6,7 +6,7 @@ import { GetRoomDto } from './dto/get-room.dto'
 import { UseCaseError } from 'src/application/ports/usecases/usecase-error'
 
 @Injectable()
-export class EnterRoomUseCase {
+export class EnableEntryUseCase {
   constructor(
     @Inject(forwardRef(() => ISpaceRepository))
     private readonly spaceRepository: ISpaceRepository,
