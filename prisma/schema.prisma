@@ -14,7 +14,36 @@ enum SpacePrivacy {
 model Space {
   id         String     @id @default(cuid())
   privacy    SpacePrivacy @default(public)
+  name       String?
+  creatorId  String     @map("creator_id")
+  members     SpaceMember[]
   createdAt  DateTime    @default(now()) @map("created_at")
   updatedAt  DateTime    @updatedAt @map("updated_at")
   @@map("spaces")
+}
+
+enum SpaceRole {
+  owner
+  admin
+  member
+}
+
+enum RequestStatus {
+  pending
+  approved
+  rejected
+}
+
+model SpaceMember {
+  id        String    @id @default(cuid())
+  spaceId   String
+  userId    String
+  role      SpaceRole @default(member)
+  status    RequestStatus  @default(pending)
+  joinedAt  DateTime  @default(now())
+
+  space     Space     @relation(fields: [spaceId], references: [id])
+
+  @@unique([spaceId, userId])
+  @@map("space_members")
 }
