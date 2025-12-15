@@ -17,17 +17,19 @@ RUN pnpm prisma generate
 COPY ../tsconfig*.json ./
 COPY ../nest-cli.json ./
 COPY ../src ./src
+COPY ../.credentials ./.credentials
 RUN pnpm run build
 
 # ===== Runner =====
 FROM node:22-alpine
-WORKDIR /appg
+WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=4000
 
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/.credentials ./.credentials
 
 EXPOSE 4000
 CMD ["node", "dist/main.js"]
