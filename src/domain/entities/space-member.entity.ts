@@ -1,0 +1,35 @@
+import { BaseEntity } from './base.entity'
+
+export type MemberRole = 'owner' | 'admin' | 'member'
+export type MemberStatus = 'approved' | 'pending' | 'rejected' | 'none'
+
+export class SpaceMember extends BaseEntity {
+  readonly id: number
+  readonly spaceId: string
+  readonly userId?: string
+  readonly email: string
+  readonly role: MemberRole
+  readonly status: MemberStatus
+  readonly joinedAt: Date
+
+  constructor(params: {
+    id: number
+    spaceId: string
+    userId?: string
+    email: string
+    role: MemberRole
+    status: MemberStatus
+    joinedAt: Date
+    createdAt?: Date
+    updatedAt?: Date
+  }) {
+    super(params)
+    this.id = params.id
+    this.spaceId = params.spaceId
+    this.userId = params.userId
+    this.email = params.email
+    this.role = params.role
+    this.status = params.status
+    this.joinedAt = params.joinedAt
+  }
+}

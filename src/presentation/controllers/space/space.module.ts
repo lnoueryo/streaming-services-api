@@ -10,22 +10,42 @@ import { ISignalingGateway } from 'src/application/ports/gateways/signaling.gatw
 import { SignalingGateway } from 'src/infrastructure/gateways/signaling.gateway'
 import { SignalingHttpClient } from 'src/infrastructure/http/signaling-client'
 import { EnableEntryUseCase } from 'src/application/usecases/space/enable-entry.usecase'
+import { AcceptSpaceInviteUseCase } from 'src/application/usecases/space/accept-space-invite.usecase'
+import { InviteSpaceService } from 'src/domain/services/space/invite-space.service'
+import { ISpaceMemberRepository } from 'src/application/ports/repositories/space-member.repository'
+import { SpaceMemberRepository } from 'src/infrastructure/repositories/space-member.repository'
+import { JwtModule } from '@nestjs/jwt'
 
+const jwtConfig = {
+  secret: process.env.JWT_SECRET || 'default_secret',
+  signOptions: { expiresIn: 14400 }
+}
 @Module({
+  imports: [JwtModule.register(jwtConfig)],
   controllers: [SpaceController],
   providers: [
     CreateSpaceUseCase,
+    AcceptSpaceInviteUseCase,
     GetPublicSpaceUseCase,
     EnterLobbyUseCase,
     EnableEntryUseCase,
     SignalingHttpClient,
+    InviteSpaceService,
     {
       provide: ISpaceRepository,
       useClass: SpaceRepository
     },
     {
+      provide: ISpaceMemberRepository,
+      useClass: SpaceMemberRepository
+    },
+    {
       provide: ISignalingGateway,
       useClass: SignalingGateway
+    },
+    {
+      provide: 'InviteSpaceService',
+      useClass: InviteSpaceService
     },
     {
       provide: 'PRISMA',

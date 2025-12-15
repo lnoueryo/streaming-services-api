@@ -8,17 +8,18 @@ datasource db {
 }
 enum SpacePrivacy {
   public
+  protected
   private
 }
 
 model Space {
-  id         String     @id @default(cuid())
-  privacy    SpacePrivacy @default(public)
-  name       String?
-  creatorId  String     @map("creator_id")
-  members     SpaceMember[]
-  createdAt  DateTime    @default(now()) @map("created_at")
-  updatedAt  DateTime    @updatedAt @map("updated_at")
+  id            String          @id @default(cuid())
+  privacy       SpacePrivacy    @default(public)
+  name          String?
+  creatorId     String          @map("creator_id")
+  spaceMembers  SpaceMember[]
+  createdAt     DateTime        @default(now()) @map("created_at")
+  updatedAt     DateTime        @updatedAt @map("updated_at")
   @@map("spaces")
 }
 
@@ -29,21 +30,23 @@ enum SpaceRole {
 }
 
 enum RequestStatus {
+  none
   pending
   approved
   rejected
 }
 
 model SpaceMember {
-  id        String    @id @default(cuid())
-  spaceId   String
-  userId    String
-  role      SpaceRole @default(member)
-  status    RequestStatus  @default(pending)
-  joinedAt  DateTime  @default(now())
-
-  space     Space     @relation(fields: [spaceId], references: [id])
-
-  @@unique([spaceId, userId])
+  id          Int             @id @default(autoincrement())
+  spaceId     String          @map("space_id")
+  userId      String?         @map("user_id")
+  email       String
+  role        SpaceRole       @default(member)
+  status      RequestStatus   @default(none)
+  joinedAt    DateTime?       @map("joined_at")
+  createdAt   DateTime        @default(now()) @map("created_at")
+  updatedAt   DateTime        @updatedAt @map("updated_at")
+  space       Space           @relation(fields: [spaceId], references: [id])
+  @@unique([spaceId, email])
   @@map("space_members")
 }

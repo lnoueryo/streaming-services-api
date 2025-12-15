@@ -12,15 +12,12 @@ export class SignalingGateway implements ISignalingGateway {
     spaceId: string
     user: { id: string; token?: string; session?: string }
   }): Promise<Room> {
-    const resp = await this.http.axiosRef.get(
-      `/room/${params.spaceId}/user`,
-      {
-        headers: {
-          authorization: `Bearer ${params.user.token}`,
-          cookie: `session=${params.user.session}`
-        }
+    const resp = await this.http.axiosRef.get(`/room/${params.spaceId}/user`, {
+      headers: {
+        authorization: `Bearer ${params.user.token}`,
+        cookie: `session=${params.user.session}`
       }
-    )
+    })
     return resp.data ? new Room(resp.data) : null
   }
   async deleteRtcClient(params: {

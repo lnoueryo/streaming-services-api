@@ -1,10 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common'
 import {
   FindSpacesParam,
-  FindSpaceParam,
   SpaceWhere,
-  ISpaceRepository
+  ISpaceRepository,
+  CreateSpaceParam
 } from 'src/application/ports/repositories/space.repository'
+import { SpaceMember } from 'src/domain/entities/space-member.entity'
 import { Space } from 'src/domain/entities/space.entity'
 import { IPrismaClient } from 'src/infrastructure/plugins/prisma'
 
@@ -20,13 +21,26 @@ export class SpaceRepository implements ISpaceRepository {
     })
     return spaces.map((space) => new Space(space))
   }
-  async findSpace(params: FindSpaceParam): Promise<Space | null> {
+  async findSpace(id: string): Promise<Space | null> {
     const space = await this.prisma.space.findFirst({
       where: {
-        id: params.id
+        id
+      },
+      include: {
+        spaceMembers: true
       }
     })
-    return space ? new Space(space) : space
+    if (!space) {
+      return null
+    }
+    const spaceMembers =
+      space.spaceMembers?.map((member) => {
+        return new SpaceMember(member)
+      }) || []
+    return new Space({
+      ...space,
+      spaceMembers
+    })
   }
   async countSpaces(params: SpaceWhere) {
     return await this.prisma.space.count({
@@ -35,9 +49,16 @@ export class SpaceRepository implements ISpaceRepository {
       }
     })
   }
-  async create() {
+  async create(params: CreateSpaceParam): Promise<Space> {
     const space = await this.prisma.space.create({
-      data: {}
+      data: {
+        name: params.name || null,
+        privacy: params.privacy,
+        creatorId: params.creatorId,
+        spaceMembers: {
+          create: params.members || []
+        }
+      }
     })
     return new Space(space)
   }

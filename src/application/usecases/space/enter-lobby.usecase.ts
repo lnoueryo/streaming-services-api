@@ -19,7 +19,7 @@ export class EnterLobbyUseCase {
     user: { id: string; token: string }
   }): Promise<UseCaseResult<GetRoomDto, 'not-found' | 'internal'>> {
     try {
-      const space = await this.spaceRepository.findSpace({ id: params.spaceId })
+      const space = await this.spaceRepository.findSpace(params.spaceId)
       if (!space) {
         return {
           error: {
@@ -31,27 +31,25 @@ export class EnterLobbyUseCase {
       try {
         const room = await this.signalingGateway.getRoom(params)
         return {
-          success: new GetRoomDto(
-            {
-              id: space.id,
-              privacy: space.privacy,
-              participants: room.participants
-            },
-            params.user
-          )
+          success: new GetRoomDto({
+            id: space.id,
+            privacy: space.privacy,
+            participants: room.participants,
+            isJoined: room.participants.some(
+              (participant) => participant.id === params.user.id
+            )
+          })
         }
       } catch (error) {
         if (error instanceof UseCaseError) {
           if (error.type === 'not-found') {
             return {
-              success: new GetRoomDto(
-                {
-                  id: space.id,
-                  privacy: space.privacy,
-                  participants: []
-                },
-                params.user
-              )
+              success: new GetRoomDto({
+                id: space.id,
+                privacy: space.privacy,
+                participants: [],
+                isJoined: false
+              })
             }
           }
         }
