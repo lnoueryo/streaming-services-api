@@ -4,8 +4,9 @@ import { UseCaseResult } from 'src/application/ports/usecases/usecase-result'
 import { ISignalingGateway } from 'src/application/ports/gateways/signaling.gatway'
 import { GetRoomDto } from './dto/get-room.dto'
 import { DomainError } from 'src/domain/errors/domain-error'
-import { SpacePrivacy } from 'src/domain/entities/space.entity'
+import { Space, SpacePrivacy } from 'src/domain/entities/space.entity'
 import { Participant } from 'src/domain/entities/participant.entity'
+import { Room } from 'src/domain/entities/room.entity'
 
 type EnableEntryUseCaseResult = {
   id: string
@@ -13,6 +14,8 @@ type EnableEntryUseCaseResult = {
   participants: Participant[]
   isParticipated: boolean
 }
+
+type ErrorType = 'not-found' | 'internal'
 
 @Injectable()
 export class EnableEntryUseCase {
@@ -33,57 +36,46 @@ export class EnableEntryUseCase {
     try {
       const space = await this.spaceRepository.findSpace(params.spaceId)
       if (!space) {
-        return {
-          error: {
-            type: 'not-found',
-            message: 'スペースが存在しません'
-          }
-        }
+        return this.error('not-found', 'スペースが存在しません')
       }
       try {
         if (params.body.force) {
           const room = await this.signalingGateway.deleteRtcClient(params)
-          return {
-            success: new GetRoomDto({
-              id: space.id,
-              privacy: space.privacy,
-              participants: room.participants,
-              isParticipated: room.isUserParticipated(params.user.id)
-            })
-          }
+          return this.success({ space, room, user: params.user })
         }
         const room = await this.signalingGateway.getRoom(params)
-        return {
-          success: new GetRoomDto({
-            id: space.id,
-            privacy: space.privacy,
-            participants: room.participants,
-            isParticipated: room.isUserParticipated(params.user.id)
-          })
-        }
+        return this.success({ space, room, user: params.user })
       } catch (error) {
         if (error instanceof DomainError) {
           if (error.type === 'not-found') {
-            return {
-              success: new GetRoomDto({
-                id: space.id,
-                privacy: space.privacy,
-                participants: [],
-                isParticipated: false
-              })
-            }
+            return this.success({ space, user: params.user })
           }
         }
         throw error
       }
     } catch (error) {
       Logger.error(error)
-      return {
-        error: {
-          type: 'internal',
-          message: 'Internal Server Error'
-        }
-      }
+      return this.error('internal', 'Internal Server Error')
     }
+  }
+
+  private success({ space, room, user }: {
+    space: Space,
+    room?: Room,
+    user: { id: string }
+  }) {
+    return {
+      success: new GetRoomDto({
+        id: space.id,
+        name: space.name,
+        privacy: space.privacy,
+        participants: room?.participants || [],
+        isParticipated: room?.isUserParticipated(user.id) || false
+      })
+    }
+  }
+
+  private error(type: ErrorType, message: string) {
+    return { error: { type, message } }
   }
 }
