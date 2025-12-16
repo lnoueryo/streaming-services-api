@@ -35,9 +35,7 @@ export class EnterLobbyUseCase {
             id: space.id,
             privacy: space.privacy,
             participants: room.participants,
-            isJoined: room.participants.some(
-              (participant) => participant.id === params.user.id
-            )
+            isParticipated: room.isUserParticipated(params.user.id)
           })
         }
       } catch (error) {
@@ -48,7 +46,7 @@ export class EnterLobbyUseCase {
                 id: space.id,
                 privacy: space.privacy,
                 participants: [],
-                isJoined: false
+                isParticipated: false
               })
             }
           }

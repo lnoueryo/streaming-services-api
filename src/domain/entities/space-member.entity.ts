@@ -44,4 +44,7 @@ export class SpaceMember extends BaseEntity {
   get userId() {
     return this._userId
   }
+  static initialStatus(role: MemberRole): MemberStatus {
+    return role === 'member' ? 'none' : 'approved'
+  }
 }

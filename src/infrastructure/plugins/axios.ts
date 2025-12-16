@@ -1,8 +1,5 @@
 import axios, { AxiosRequestConfig, AxiosInstance } from 'axios'
-import {
-  CommonErrorCode,
-  DomainError
-} from 'src/domain/errors/domain-error'
+import { CommonErrorCode, DomainError } from 'src/domain/errors/domain-error'
 
 export const httpStatusToCommonErrorCodeMap = {
   400: 'validation',

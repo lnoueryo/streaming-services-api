@@ -11,16 +11,9 @@ export type FindSpacesParam = SpaceWhere & {
   limit: number
 }
 
-export type CreateSpaceParam = {
-  name?: string
-  privacy: SpacePrivacy
-  creatorId: string
-  members?: Omit<CreateSpaceMemberParam, 'spaceId'>[]
-}
-
 export type ISpaceRepository = {
   findSpaces(params: FindSpacesParam): Promise<Space[]>
   findSpace(id: string): Promise<Space>
   countSpaces(params: SpaceWhere)
-  create(params: CreateSpaceParam): Promise<Space>
+  create(params: Space): Promise<Space>
 }

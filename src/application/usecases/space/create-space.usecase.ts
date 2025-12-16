@@ -3,14 +3,16 @@ import { ISpaceRepository } from 'src/application/ports/repositories/space.repos
 import { UseCaseResult } from 'src/application/ports/usecases/usecase-result'
 import { auth } from 'src/infrastructure/plugins/firebase-admin'
 import { InviteSpaceService } from 'src/domain/services/space/invite-space.service'
-import { SpacePrivacy } from 'src/domain/entities/space.entity'
-import { MemberRole } from 'src/domain/entities/space-member.entity'
+import { Space, SpacePrivacy } from 'src/domain/entities/space.entity'
+import {
+  MemberRole,
+  SpaceMember
+} from 'src/domain/entities/space-member.entity'
 
 type Member = {
   email: string
   role: Exclude<MemberRole, 'owner'>
 }
-type DefaultMemberStatus = 'approved' | 'none'
 
 @Injectable()
 export class CreateSpaceUseCase {
@@ -40,13 +42,17 @@ export class CreateSpaceUseCase {
     >
   > {
     try {
-      const members: {
-        userId?: string
-        email: string
-        role: MemberRole
-        status: DefaultMemberStatus
-      }[] = []
-      if (params.body.privacy !== 'public') {
+      const space = new Space({
+        name: params.body.name,
+        privacy: params.body.privacy,
+        creatorId: params.user.id
+      })
+
+      if (!space.isPublic()) {
+        space.assignOwner({
+          userId: params.user.id,
+          email: params.user.email
+        })
         const fetchUsers: Array<
           Promise<{
             request: Member
@@ -74,48 +80,31 @@ export class CreateSpaceUseCase {
         const firebaseUsers = await Promise.all(fetchUsers)
         for (const firebaseUser of firebaseUsers) {
           if (!firebaseUser.data) {
-            members.push({
-              userId: undefined,
+            space.addMember({
               email: firebaseUser.request.email,
-              role: firebaseUser.request.role,
-              status:
-                firebaseUser.request.role === 'member' ? 'none' : 'approved'
+              role: firebaseUser.request.role
             })
             continue
           }
           if (firebaseUser.data.uid === params.user.id) {
             continue
           }
-          members.push({
+          space.addMember({
             userId: firebaseUser.data.uid,
             email: firebaseUser.request.email,
-            role: firebaseUser.request.role,
-            status: firebaseUser.request.role === 'member' ? 'none' : 'approved'
+            role: firebaseUser.request.role
           })
         }
-        // 作成者のロールはownerで登録
-        const creatorMember = {
-          userId: params.user.id,
-          email: params.user.email,
-          role: 'owner' as const,
-          status: 'approved' as const
-        }
-        members.push(creatorMember)
       }
-      const payload = {
-        name: params.body.name,
-        privacy: params.body.privacy,
-        creatorId: params.user.id,
-        members
-      }
-      const space = await this.spaceRepository.create(payload)
-      const url = this.inviteSpaceService.generate(space)
+
+      const createdSpace = await this.spaceRepository.create(space)
+      const url = this.inviteSpaceService.generate(createdSpace)
       return {
         success: {
           space: {
-            id: space.id,
-            name: space.name,
-            privacy: space.privacy
+            id: createdSpace.id,
+            name: createdSpace.name,
+            privacy: createdSpace.privacy
           },
           url
         }

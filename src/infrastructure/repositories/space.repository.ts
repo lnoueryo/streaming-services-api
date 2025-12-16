@@ -2,8 +2,7 @@ import { Inject, Injectable } from '@nestjs/common'
 import {
   FindSpacesParam,
   SpaceWhere,
-  ISpaceRepository,
-  CreateSpaceParam
+  ISpaceRepository
 } from 'src/application/ports/repositories/space.repository'
 import { SpaceMember } from 'src/domain/entities/space-member.entity'
 import { Space } from 'src/domain/entities/space.entity'
@@ -49,14 +48,14 @@ export class SpaceRepository implements ISpaceRepository {
       }
     })
   }
-  async create(params: CreateSpaceParam): Promise<Space> {
+  async create(params: Space): Promise<Space> {
     const space = await this.prisma.space.create({
       data: {
         name: params.name || null,
         privacy: params.privacy,
         creatorId: params.creatorId,
         spaceMembers: {
-          create: params.members || []
+          create: params.spaceMembers || []
         }
       }
     })

@@ -1,6 +1,7 @@
 import { DomainError } from '../errors/domain-error'
 import { BaseEntity } from './base.entity'
 import { SpaceMember } from './space-member.entity'
+import { v7 as uuidv7 } from 'uuid'
 
 export type SpacePrivacy = 'public' | 'protected' | 'private'
 export class Space extends BaseEntity {
@@ -8,10 +9,10 @@ export class Space extends BaseEntity {
   readonly name?: string
   readonly privacy: SpacePrivacy
   readonly creatorId: string
-  readonly spaceMembers?: SpaceMember[]
+  readonly spaceMembers: SpaceMember[]
 
   constructor(params: {
-    id: string
+    id?: string
     name?: string
     privacy: SpacePrivacy
     creatorId: string
@@ -20,11 +21,11 @@ export class Space extends BaseEntity {
     updatedAt?: Date
   }) {
     super(params)
-    this.id = params.id
+    this.id = params.id || uuidv7()
     this.name = params.name
     this.privacy = params.privacy
     this.creatorId = params.creatorId
-    this.spaceMembers = params?.spaceMembers
+    this.spaceMembers = params?.spaceMembers || []
   }
   isPublic() {
     return this.privacy === 'public'
@@ -38,10 +39,7 @@ export class Space extends BaseEntity {
   getSpaceMemberByEmail(email: string): SpaceMember | undefined {
     return this.spaceMembers.find((member) => member.email === email)
   }
-  joinProtected(
-    userId: string,
-    email: string
-  ): SpaceMember | null {
+  joinProtected(userId: string, email: string): SpaceMember | null {
     if (!this.isProtected()) {
       throw new DomainError({
         type: 'internal',
@@ -104,5 +102,37 @@ export class Space extends BaseEntity {
     }
     // 招待承認済み
     return
+  }
+  addMember(memberParams: {
+    userId?: string
+    email: string
+    role: 'owner' | 'admin' | 'member'
+  }) {
+    const existingMember = this.getSpaceMemberByEmail(memberParams.email)
+    if (existingMember) {
+      throw new DomainError({
+        type: 'validation',
+        message: 'Member with this email already exists in the space',
+        code: 'member-already-exists'
+      })
+    }
+    const newMember = new SpaceMember({
+      spaceId: this.id,
+      userId: memberParams.userId,
+      email: memberParams.email,
+      role: memberParams.role,
+      status: SpaceMember.initialStatus(memberParams.role)
+    })
+    this.spaceMembers.push(newMember)
+  }
+  assignOwner(ownerParams: { userId: string; email: string }) {
+    const owner = new SpaceMember({
+      spaceId: this.id,
+      userId: ownerParams.userId,
+      email: ownerParams.email,
+      role: 'owner' as const,
+      status: 'approved' as const
+    })
+    this.spaceMembers.push(owner)
   }
 }

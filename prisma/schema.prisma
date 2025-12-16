@@ -13,7 +13,7 @@ enum SpacePrivacy {
 }
 
 model Space {
-  id            String          @id @default(cuid())
+  id            String          @id @default(uuid(7))
   privacy       SpacePrivacy    @default(public)
   name          String?
   creatorId     String          @map("creator_id")

@@ -59,7 +59,7 @@ export class SpaceMemberRepository implements ISpaceMemberRepository {
         role: params.role,
         status: params.status,
         joinedAt: params.joinedAt
-      },
+      }
     })
     return new SpaceMember(spaceMember)
   }

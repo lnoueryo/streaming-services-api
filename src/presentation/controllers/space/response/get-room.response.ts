@@ -4,12 +4,12 @@ export class GetRoomResponse {
   id: string
   privacy: string
   participants: GetRoomDto['participants']
-  isJoined: boolean
+  isParticipated: boolean
 
   constructor(space: GetRoomDto) {
     this.id = space.id
     this.privacy = space.privacy
     this.participants = space.participants
-    this.isJoined = space.isJoined
+    this.isParticipated = space.isParticipated
   }
 }
