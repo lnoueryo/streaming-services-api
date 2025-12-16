@@ -4,13 +4,13 @@ import { UseCaseResult } from 'src/application/ports/usecases/usecase-result'
 import { auth } from 'src/infrastructure/plugins/firebase-admin'
 import { InviteSpaceService } from 'src/domain/services/space/invite-space.service'
 import { SpacePrivacy } from 'src/domain/entities/space.entity'
-import { DefaultMemberStatus } from 'src/application/ports/repositories/space-member.repository'
 import { MemberRole } from 'src/domain/entities/space-member.entity'
 
 type Member = {
   email: string
   role: Exclude<MemberRole, 'owner'>
 }
+type DefaultMemberStatus = 'approved' | 'none'
 
 @Injectable()
 export class CreateSpaceUseCase {
@@ -108,7 +108,6 @@ export class CreateSpaceUseCase {
         creatorId: params.user.id,
         members
       }
-      console.log(payload)
       const space = await this.spaceRepository.create(payload)
       const url = this.inviteSpaceService.generate(space)
       return {
@@ -122,7 +121,6 @@ export class CreateSpaceUseCase {
         }
       }
     } catch (error) {
-      console.error(error)
       Logger.error(error)
       return {
         error: {

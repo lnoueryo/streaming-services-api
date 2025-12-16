@@ -6,7 +6,6 @@ import {
 export const ISpaceMemberRepository = Symbol('ISpaceMemberRepository')
 
 export type MemberStatus = 'approved' | 'pending' | 'rejected' | 'none'
-export type DefaultMemberStatus = 'approved' | 'none'
 
 export type CreateSpaceMemberParam = {
   spaceId: string
@@ -21,7 +20,7 @@ export type UpdateSpaceMemberParam = {
   userId?: string
   email: string
   role?: MemberRole
-  status?: DefaultMemberStatus
+  status?: MemberStatus
   joinedAt?: Date
 }
 

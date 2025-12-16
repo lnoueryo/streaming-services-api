@@ -4,22 +4,22 @@ export type MemberRole = 'owner' | 'admin' | 'member'
 export type MemberStatus = 'approved' | 'pending' | 'rejected' | 'none'
 
 export class SpaceMember extends BaseEntity {
-  readonly id: number
+  readonly id?: number
   readonly spaceId: string
-  readonly userId?: string
+  public userId?: string
   readonly email: string
   readonly role: MemberRole
   readonly status: MemberStatus
-  readonly joinedAt: Date
+  readonly joinedAt?: Date
 
   constructor(params: {
-    id: number
+    id?: number
     spaceId: string
     userId?: string
     email: string
     role: MemberRole
     status: MemberStatus
-    joinedAt: Date
+    joinedAt?: Date
     createdAt?: Date
     updatedAt?: Date
   }) {
@@ -31,5 +31,15 @@ export class SpaceMember extends BaseEntity {
     this.role = params.role
     this.status = params.status
     this.joinedAt = params.joinedAt
+  }
+
+  canJoin() {
+    return this.status !== 'rejected'
+  }
+  isAcceptInvitation() {
+    return !!this.userId
+  }
+  acceptInvitation(userId: string) {
+    this.userId = userId
   }
 }

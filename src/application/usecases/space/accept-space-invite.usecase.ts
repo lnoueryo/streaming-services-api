@@ -13,6 +13,8 @@ type AcceptSpaceInviteUseCaseResult = {
     privacy: string
   }
 }
+
+type ErrorType = 'not-found' | 'forbidden' | 'internal'
 @Injectable()
 export class AcceptSpaceInviteUseCase {
   constructor(
@@ -27,124 +29,61 @@ export class AcceptSpaceInviteUseCase {
   async do(params: {
     user: { id: string; email: string }
     hash: string
-  }): Promise<
-    UseCaseResult<
-      AcceptSpaceInviteUseCaseResult,
-      'not-found' | 'forbidden' | 'internal'
-    >
-  > {
+  }): Promise<UseCaseResult<AcceptSpaceInviteUseCaseResult, ErrorType>> {
     try {
-      /*
-      hashをデコード
-      hashが不正ならnot-foundエラーを返す
-      デコードした情報からspaceを取得
-      space+spaceMemberを取得
-      spaceが存在しなければnot-foundエラーを返す
-      space.publicがpublicならそのままスルーしてリダイレクト
-      spaceMemberに自分のレコードが存在しなければvalidationエラーを返す（一旦招待された人のみ）
-      spaceMemberのstatusがapprovedでなければvalidationエラーを返す
-      正常ならspace情報を返す
-      */
       // TODO : inviteの有効期限有無、チェック、decodeエラーの処理を実装する
       const spaceInvite = this.inviteSpaceService.decode(params.hash)
       const space = await this.spaceRepository.findSpace(spaceInvite.id)
       if (!space) {
-        return {
-          error: {
-            type: 'not-found',
-            message: '部屋が存在しません'
-          }
-        }
+        return this.error('not-found', 'スペースが見つかりません')
       }
-      if (space.privacy === 'public') {
-        return {
-          success: {
-            space: {
-              id: space.id,
-              name: space.name,
-              privacy: space.privacy
-            },
-            redirect: `/spaces/${space.id}`
-          }
+      if (!space.canAccept(params.user.email)) {
+        return this.error('forbidden', 'スペースに参加する権限がありません')
+      }
+      if (space.isPublic()) {
+        return this.success(space)
+      } else if (space.isProtected()) {
+        const { invitedMember, newMember } = space.joinProtected(
+          params.user.id,
+          params.user.email
+        )
+        if (invitedMember) {
+          await this.spaceMemberRepository.update(invitedMember)
         }
-      } else if (space.privacy === 'protected') {
-        const spaceMember = space.spaceMembers.find((member) => {
-          return member.email === params.user.email
-        })
-        if (spaceMember) {
-          if (!spaceMember.userId) {
-            await this.spaceMemberRepository.update({
-              spaceId: spaceMember.spaceId,
-              userId: params.user.id,
-              email: spaceMember.email
-            })
-          }
-          return {
-            success: {
-              space: {
-                id: space.id,
-                name: space.name,
-                privacy: space.privacy
-              },
-              redirect: `/spaces/${space.id}`
-            }
-          }
+        if (newMember) {
+          await this.spaceMemberRepository.create(newMember)
         }
-        const newSpaceMember = await this.spaceMemberRepository.create({
-          role: 'member',
-          status: 'none',
-          spaceId: space.id,
-          userId: params.user.id,
-          email: params.user.email
-        })
-        return {
-          success: {
-            space: {
-              id: space.id,
-              name: space.name,
-              privacy: space.privacy
-            },
-            redirect: `/spaces/${space.id}`
-          }
+
+        return this.success(space)
+      } else if (space.isPrivate()) {
+        const { invitedMember } = space.joinPrivate(
+          params.user.id,
+          params.user.email
+        )
+        if (invitedMember) {
+          await this.spaceMemberRepository.update(invitedMember)
         }
-      } else if (space.privacy === 'private') {
-        const spaceMember = space.spaceMembers.find((member) => {
-          return member.email === params.user.email
-        })
-        if (!spaceMember) {
-          return {
-            error: {
-              type: 'forbidden',
-              message: '招待されていないため参加できません'
-            }
-          }
-        }
-        if (!spaceMember.userId) {
-          await this.spaceMemberRepository.update({
-            spaceId: spaceMember.spaceId,
-            userId: params.user.id,
-            email: spaceMember.email
-          })
-        }
-        return {
-          success: {
-            space: {
-              id: space.id,
-              name: space.name,
-              privacy: space.privacy
-            },
-            redirect: `/spaces/${space.id}`
-          }
-        }
+        return this.success(space)
       }
     } catch (error) {
       Logger.error(error)
-      return {
-        error: {
-          type: 'internal',
-          message: 'Internal Server Error'
-        }
+      return this.error('internal', 'サーバーエラーが発生しました')
+    }
+  }
+  private success(space: Space) {
+    return {
+      success: {
+        space: {
+          id: space.id,
+          name: space.name,
+          privacy: space.privacy
+        },
+        redirect: `/spaces/${space.id}`
       }
     }
+  }
+
+  private error(type: ErrorType, message: string) {
+    return { error: { type, message } }
   }
 }
