@@ -3,7 +3,7 @@ import { ISpaceRepository } from 'src/application/ports/repositories/space.repos
 import { UseCaseResult } from 'src/application/ports/usecases/usecase-result'
 import { ISignalingGateway } from 'src/application/ports/gateways/signaling.gatway'
 import { GetRoomDto } from './dto/get-room.dto'
-import { UseCaseError } from 'src/application/ports/usecases/usecase-error'
+import { DomainError } from 'src/domain/errors/domain-error'
 import { SpacePrivacy } from 'src/domain/entities/space.entity'
 import { Participant } from 'src/domain/entities/participant.entity'
 
@@ -66,7 +66,7 @@ export class EnableEntryUseCase {
           })
         }
       } catch (error) {
-        if (error instanceof UseCaseError) {
+        if (error instanceof DomainError) {
           if (error.type === 'not-found') {
             return {
               success: new GetRoomDto({

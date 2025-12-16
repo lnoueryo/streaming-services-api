@@ -6,7 +6,7 @@ export type MemberStatus = 'approved' | 'pending' | 'rejected' | 'none'
 export class SpaceMember extends BaseEntity {
   readonly id?: number
   readonly spaceId: string
-  public userId?: string
+  private _userId?: string
   readonly email: string
   readonly role: MemberRole
   readonly status: MemberStatus
@@ -26,13 +26,12 @@ export class SpaceMember extends BaseEntity {
     super(params)
     this.id = params.id
     this.spaceId = params.spaceId
-    this.userId = params.userId
+    this._userId = params.userId
     this.email = params.email
     this.role = params.role
     this.status = params.status
     this.joinedAt = params.joinedAt
   }
-
   canJoin() {
     return this.status !== 'rejected'
   }
@@ -40,6 +39,9 @@ export class SpaceMember extends BaseEntity {
     return !!this.userId
   }
   acceptInvitation(userId: string) {
-    this.userId = userId
+    this._userId = userId
+  }
+  get userId() {
+    return this._userId
   }
 }

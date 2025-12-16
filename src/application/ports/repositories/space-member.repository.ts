@@ -27,4 +27,5 @@ export type UpdateSpaceMemberParam = {
 export type ISpaceMemberRepository = {
   create(params: CreateSpaceMemberParam): Promise<SpaceMember>
   update(params: UpdateSpaceMemberParam): Promise<SpaceMember>
+  upsert(params: SpaceMember): Promise<SpaceMember>
 }

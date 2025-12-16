@@ -1,8 +1,8 @@
 import axios, { AxiosRequestConfig, AxiosInstance } from 'axios'
 import {
   CommonErrorCode,
-  UseCaseError
-} from 'src/application/ports/usecases/usecase-error'
+  DomainError
+} from 'src/domain/errors/domain-error'
 
 export const httpStatusToCommonErrorCodeMap = {
   400: 'validation',
@@ -27,7 +27,7 @@ export class AxiosFactory {
           const status = res?.status ?? 0
           const message = res?.data?.message ?? ''
           const code = res?.data?.code ?? ''
-          throw new UseCaseError({
+          throw new DomainError({
             type: toCommonErrorCode(status),
             message,
             code

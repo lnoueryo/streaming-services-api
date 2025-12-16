@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { Space } from 'src/domain/entities/space.entity'
+import { DomainError } from 'src/domain/errors/domain-error'
 
 type InvitePayload = {
   id: string
@@ -17,7 +18,15 @@ export class InviteSpaceService {
     })
   }
 
-  decode(hash: string): InvitePayload {
-    return this.jwtService.verify<InvitePayload>(hash)
+  decode(hash: string): InvitePayload | undefined {
+    try {
+      return this.jwtService.verify<InvitePayload>(hash)
+    } catch (error) {
+      throw new DomainError({
+        type: 'validation',
+        message: 'invalid invite hash',
+        code: 'invalid-hash'
+      })
+    }
   }
 }

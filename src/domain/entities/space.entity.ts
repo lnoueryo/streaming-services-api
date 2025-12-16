@@ -1,3 +1,4 @@
+import { DomainError } from '../errors/domain-error'
 import { BaseEntity } from './base.entity'
 import { SpaceMember } from './space-member.entity'
 
@@ -34,35 +35,36 @@ export class Space extends BaseEntity {
   isPrivate() {
     return this.privacy === 'private'
   }
-  canAccept(email: string) {
-    const spaceMember = this.getSpaceMemberByEmail(email)
-    if (this.isPrivate() && !spaceMember) {
-      return false
-    }
-    if (spaceMember && spaceMember.canJoin()) {
-      return false
-    }
-    return true
-  }
   getSpaceMemberByEmail(email: string): SpaceMember | undefined {
     return this.spaceMembers.find((member) => member.email === email)
   }
   joinProtected(
     userId: string,
     email: string
-  ): {
-    newMember?: SpaceMember
-    invitedMember?: SpaceMember
-  } {
+  ): SpaceMember | null {
+    if (!this.isProtected()) {
+      throw new DomainError({
+        type: 'internal',
+        message: 'this space is not protected space',
+        code: 'invalid-space-privacy'
+      })
+    }
     const spaceMember = this.getSpaceMemberByEmail(email)
 
     if (spaceMember) {
+      if (!spaceMember.canJoin()) {
+        throw new DomainError({
+          type: 'forbidden',
+          message: 'space member is rejected by owner',
+          code: 'member-rejected'
+        })
+      }
       if (!spaceMember.isAcceptInvitation()) {
         spaceMember.acceptInvitation(userId)
-        return { invitedMember: spaceMember }
+        return spaceMember
       }
       // 招待承認済み
-      return {}
+      return
     }
 
     const newMember = new SpaceMember({
@@ -72,15 +74,35 @@ export class Space extends BaseEntity {
       userId,
       email
     })
-    return { newMember }
+    return newMember
   }
-  joinPrivate(userId: string, email: string): { invitedMember?: SpaceMember } {
-    const invitedMember = this.getSpaceMemberByEmail(email)!
+  joinPrivate(userId: string, email: string): SpaceMember | undefined {
+    if (!this.isPrivate()) {
+      throw new DomainError({
+        type: 'internal',
+        message: 'this space is not private space',
+        code: 'invalid-space-privacy'
+      })
+    }
+    const invitedMember = this.getSpaceMemberByEmail(email)
+    if (!invitedMember) {
+      throw new DomainError({
+        type: 'forbidden',
+        message: 'invitedMember is not found for given email',
+        code: 'no-invitation'
+      })
+    }
+    if (!invitedMember.canJoin()) {
+      throw new DomainError({
+        type: 'forbidden',
+        message: 'space member is rejected by owner',
+        code: 'member-rejected'
+      })
+    }
     if (!invitedMember.isAcceptInvitation()) {
       invitedMember.acceptInvitation(userId)
-      return { invitedMember }
     }
     // 招待承認済み
-    return {}
+    return
   }
 }

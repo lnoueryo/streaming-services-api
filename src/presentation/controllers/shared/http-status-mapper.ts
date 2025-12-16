@@ -1,4 +1,4 @@
-import { CommonErrorCode } from '../../../application/ports/usecases/usecase-error'
+import { CommonErrorCode } from '../../../domain/errors/domain-error'
 
 export function getHttpStatus(code: CommonErrorCode): number {
   const commonErrorCodeToHttpStatusMap: Record<CommonErrorCode, number> = {
