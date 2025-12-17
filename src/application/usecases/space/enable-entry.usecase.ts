@@ -13,6 +13,10 @@ import { SpaceMember } from 'src/domain/entities/space-member.entity'
 type EnableEntryUseCaseResult = {
   id: string
   privacy: SpacePrivacy
+  membership: {
+    role: SpaceMember['role'],
+    status: SpaceMember['status']
+  }
   participants: Participant[]
   isParticipated: boolean
 }
