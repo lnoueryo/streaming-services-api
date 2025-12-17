@@ -41,7 +41,7 @@ export class AcceptSpaceInviteUseCase {
       if (space.isPublic()) {
         return this.success(space)
       } else if (space.isProtected()) {
-        const spaceMember = space.joinProtected(
+        const spaceMember = space.allowMemberToAcceptProtectedInvitation(
           params.user.id,
           params.user.email
         )
@@ -51,7 +51,10 @@ export class AcceptSpaceInviteUseCase {
 
         return this.success(space)
       } else if (space.isPrivate()) {
-        const spaceMember = space.joinPrivate(params.user.id, params.user.email)
+        const spaceMember = space.allowMemberToAcceptPrivateInvitation(
+          params.user.id,
+          params.user.email
+        )
         if (spaceMember) {
           await this.spaceMemberRepository.upsert(spaceMember)
         }

@@ -39,7 +39,10 @@ export class Space extends BaseEntity {
   getSpaceMemberByEmail(email: string): SpaceMember | undefined {
     return this.spaceMembers.find((member) => member.email === email)
   }
-  joinProtected(userId: string, email: string): SpaceMember | null {
+  allowMemberToAcceptProtectedInvitation(
+    userId: string,
+    email: string
+  ): SpaceMember | null {
     if (!this.isProtected()) {
       throw new DomainError({
         type: 'internal',
@@ -50,14 +53,14 @@ export class Space extends BaseEntity {
     const spaceMember = this.getSpaceMemberByEmail(email)
 
     if (spaceMember) {
-      if (!spaceMember.canJoin()) {
+      if (spaceMember.isRejectedByOwner()) {
         throw new DomainError({
           type: 'forbidden',
           message: 'space member is rejected by owner',
           code: 'member-rejected'
         })
       }
-      if (!spaceMember.isAcceptInvitation()) {
+      if (spaceMember.hasNotAcceptedInvitation()) {
         spaceMember.acceptInvitation(userId)
         return spaceMember
       }
@@ -74,7 +77,10 @@ export class Space extends BaseEntity {
     })
     return newMember
   }
-  joinPrivate(userId: string, email: string): SpaceMember | undefined {
+  allowMemberToAcceptPrivateInvitation(
+    userId: string,
+    email: string
+  ): SpaceMember | undefined {
     if (!this.isPrivate()) {
       throw new DomainError({
         type: 'internal',
@@ -90,15 +96,16 @@ export class Space extends BaseEntity {
         code: 'no-invitation'
       })
     }
-    if (!invitedMember.canJoin()) {
+    if (invitedMember.isRejectedByOwner()) {
       throw new DomainError({
         type: 'forbidden',
         message: 'space member is rejected by owner',
         code: 'member-rejected'
       })
     }
-    if (!invitedMember.isAcceptInvitation()) {
+    if (invitedMember.hasNotAcceptedInvitation()) {
       invitedMember.acceptInvitation(userId)
+      return invitedMember
     }
     // 招待承認済み
     return
@@ -134,5 +141,48 @@ export class Space extends BaseEntity {
       status: 'approved' as const
     })
     this.spaceMembers.push(owner)
+  }
+  ensureMemberCanEnterLobby(email: string): SpaceMember | undefined {
+    if (this.isPublic()) {
+      return
+    }
+    const spaceMember = this.getSpaceMemberByEmail(email)
+    if (!spaceMember) {
+      throw new DomainError({
+        type: 'forbidden',
+        code: 'no-membership',
+        message: 'user is not a member of this space'
+      })
+    }
+    if (spaceMember.isRejectedByOwner()) {
+      throw new DomainError({
+        type: 'forbidden',
+        code: 'member-rejected',
+        message: 'member is rejected by owner'
+      })
+    }
+
+    if (spaceMember.hasNotAcceptedInvitation()) {
+      throw new DomainError({
+        type: 'forbidden',
+        code: 'invitation-not-accepted',
+        message: 'invitation not accepted'
+      })
+    }
+    return spaceMember
+  }
+  ensureMemberCanEnterRoom(email: string): SpaceMember {
+    const spaceMember = this.ensureMemberCanEnterLobby(email)
+    if (!spaceMember) {
+      return
+    }
+    if (spaceMember.status !== 'approved') {
+      throw new DomainError({
+        type: 'forbidden',
+        code: 'required-approved-status',
+        message: 'member status is not approved'
+      })
+    }
+    return spaceMember
   }
 }
