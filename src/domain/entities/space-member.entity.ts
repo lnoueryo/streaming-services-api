@@ -1,4 +1,5 @@
 import { BaseEntity } from './base.entity'
+import { DomainError } from '../errors/domain-error'
 
 export type MemberRole = 'owner' | 'admin' | 'member'
 export type MemberStatus = 'approved' | 'pending' | 'rejected' | 'none'
@@ -9,7 +10,7 @@ export class SpaceMember extends BaseEntity {
   private _userId?: string
   readonly email: string
   readonly role: MemberRole
-  readonly status: MemberStatus
+  private _status: MemberStatus
   private _joinedAt?: Date
 
   constructor(params: {
@@ -29,7 +30,7 @@ export class SpaceMember extends BaseEntity {
     this._userId = params.userId
     this.email = params.email
     this.role = params.role
-    this.status = params.status
+    this._status = params.status
     this._joinedAt = params.joinedAt
   }
   canEnterLobby() {
@@ -41,17 +42,36 @@ export class SpaceMember extends BaseEntity {
   hasNotAcceptedInvitation() {
     return !this.userId
   }
+  isOwner() {
+    return this.role === 'owner'
+  }
   acceptInvitation(userId: string) {
     this._userId = userId
   }
   enterRoom() {
     this._joinedAt = new Date()
   }
+  requestEntry() {
+    if (this.isRejectedByOwner()) {
+      throw new DomainError({
+        type: 'forbidden',
+        message: 'space member is rejected by owner',
+        code: 'member-rejected'
+      })
+    }
+    this._status = 'pending'
+  }
+  applyEntryDecision(decision: 'approved' | 'rejected') {
+    this._status = decision
+  }
   get userId() {
     return this._userId
   }
   get joinedAt() {
     return this._joinedAt
+  }
+  get status() {
+    return this._status
   }
   static initialStatus(role: MemberRole): MemberStatus {
     return role === 'member' ? 'none' : 'approved'

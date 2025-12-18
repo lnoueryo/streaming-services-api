@@ -21,7 +21,7 @@ export class SpaceRepository implements ISpaceRepository {
     return spaces.map((space) => new Space(space))
   }
   async findSpace(id: string): Promise<Space | null> {
-    const space = await this.prisma.space.findFirst({
+    const space = await this.prisma.space.findUnique({
       where: {
         id
       },

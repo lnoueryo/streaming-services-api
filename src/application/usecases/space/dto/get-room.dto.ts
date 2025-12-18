@@ -13,7 +13,7 @@ export class GetRoomDto {
   readonly name?: string
   readonly privacy: SpacePrivacy
   readonly membership: {
-    role: SpaceMember['role'],
+    role: SpaceMember['role']
     status: SpaceMember['status']
   }
   readonly participants: Participant[]
@@ -23,9 +23,9 @@ export class GetRoomDto {
     name?: string
     privacy: SpacePrivacy
     membership: {
-      role: SpaceMember['role'],
+      role: SpaceMember['role']
       status: SpaceMember['status']
-    },
+    }
     participants: Participant[]
     isParticipated: boolean
   }) {

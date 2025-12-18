@@ -14,7 +14,7 @@ type EnableEntryUseCaseResult = {
   id: string
   privacy: SpacePrivacy
   membership: {
-    role: SpaceMember['role'],
+    role: SpaceMember['role']
     status: SpaceMember['status']
   }
   participants: Participant[]
