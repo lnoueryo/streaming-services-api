@@ -23,9 +23,10 @@ export class RequestEntryUseCase {
       if (!spaceMember) {
         return this.error('forbidden', 'スペースのメンバーではありません。')
       }
+      // TODO: approvedでリクエストの可能性があるので、こちらで返すステータスをフロントに反映させるべき。approvedをpendingで上書きする可能性あり
       spaceMember.requestEntry()
       await this.spaceMemberRepository.update(spaceMember)
-      // gRPCでsignalingサーバーに参加リクエストを送信する
+      // TODO: gRPCでsignalingサーバーに参加リクエストを送信する
       return {
         success: true
       }

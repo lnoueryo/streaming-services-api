@@ -1,4 +1,5 @@
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common'
+import { SpaceMember } from '@prisma/client'
 import { ISpaceMemberRepository } from 'src/application/ports/repositories/space-member.repository'
 import { UseCaseResult } from 'src/application/ports/usecases/usecase-result'
 import { EntryRequestDecisionService } from 'src/domain/services/space-member/entry-request-decision.service'
@@ -14,7 +15,11 @@ export class DecideRequestUseCase {
     params: { spaceId: string; spaceMemberId: number }
     user: { id: string; email: string }
     body: { status: 'approved' | 'rejected' }
-  }): Promise<UseCaseResult<true, 'forbidden' | 'not-found' | 'internal'>> {
+  }): Promise<UseCaseResult<{
+      id: number | undefined
+      role: SpaceMember['role']
+      status: SpaceMember['status']
+  }, 'forbidden' | 'not-found' | 'internal'>> {
     try {
       const spaceMembers = await this.spaceMemberRepository.findMany({
         spaceId: input.params.spaceId
@@ -48,9 +53,13 @@ export class DecideRequestUseCase {
         decision: input.body.status
       })
       await this.spaceMemberRepository.update(spaceMember)
-      // gRPCでsignalingサーバーに参加リクエストを送信する
+      // TODO: gRPCでsignalingサーバーに参加リクエストを送信する
       return {
-        success: true
+        success: {
+          id: spaceMember.id,
+          role: spaceMember.role,
+          status: spaceMember.status
+        }
       }
     } catch (error) {
       Logger.error(error)
