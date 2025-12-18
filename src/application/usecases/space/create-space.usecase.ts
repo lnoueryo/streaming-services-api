@@ -1,20 +1,113 @@
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common'
 import { ISpaceRepository } from 'src/application/ports/repositories/space.repository'
 import { UseCaseResult } from 'src/application/ports/usecases/usecase-result'
-import { GetTargetSpaceDto } from './dto/get-target-space.dto'
+import { auth } from 'src/infrastructure/plugins/firebase-admin'
+import { InviteSpaceService } from 'src/domain/services/space/invite-space.service'
+import { Space, SpacePrivacy } from 'src/domain/entities/space.entity'
+import {
+  MemberRole,
+  SpaceMember
+} from 'src/domain/entities/space-member.entity'
+
+type Member = {
+  email: string
+  role: Exclude<MemberRole, 'owner'>
+}
 
 @Injectable()
 export class CreateSpaceUseCase {
   constructor(
     @Inject(forwardRef(() => ISpaceRepository))
-    private readonly spaceRepository: ISpaceRepository
+    private readonly spaceRepository: ISpaceRepository,
+    private readonly inviteSpaceService: InviteSpaceService
   ) {}
-
-  async do(): Promise<UseCaseResult<GetTargetSpaceDto, 'internal'>> {
+  async do(params: {
+    user: { id: string; email: string }
+    body: {
+      name?: string
+      privacy: SpacePrivacy
+      members?: Member[]
+    }
+  }): Promise<
+    UseCaseResult<
+      {
+        space: {
+          id: string
+          privacy: SpacePrivacy
+          name?: string
+        }
+        url: string
+      },
+      'validation' | 'internal'
+    >
+  > {
     try {
-      const space = await this.spaceRepository.create()
+      const space = new Space({
+        name: params.body.name,
+        privacy: params.body.privacy,
+        creatorId: params.user.id
+      })
+
+      if (!space.isPublic()) {
+        space.assignOwner({
+          userId: params.user.id,
+          email: params.user.email
+        })
+        const fetchUsers: Array<
+          Promise<{
+            request: Member
+            data: { uid: string } | null
+          }>
+        > = []
+        for (const member of params.body.members) {
+          fetchUsers.push(
+            auth
+              .getUserByEmail(member.email)
+              .then((userRecord) => {
+                return {
+                  request: member,
+                  data: userRecord
+                }
+              })
+              .catch(() => {
+                return {
+                  request: member,
+                  data: null
+                }
+              })
+          )
+        }
+        const firebaseUsers = await Promise.all(fetchUsers)
+        for (const firebaseUser of firebaseUsers) {
+          if (!firebaseUser.data) {
+            space.addMember({
+              email: firebaseUser.request.email,
+              role: firebaseUser.request.role
+            })
+            continue
+          }
+          if (firebaseUser.data.uid === params.user.id) {
+            continue
+          }
+          space.addMember({
+            userId: firebaseUser.data.uid,
+            email: firebaseUser.request.email,
+            role: firebaseUser.request.role
+          })
+        }
+      }
+
+      const createdSpace = await this.spaceRepository.create(space)
+      const url = this.inviteSpaceService.generate(createdSpace)
       return {
-        success: new GetTargetSpaceDto(space)
+        success: {
+          space: {
+            id: createdSpace.id,
+            name: createdSpace.name,
+            privacy: createdSpace.privacy
+          },
+          url
+        }
       }
     } catch (error) {
       Logger.error(error)

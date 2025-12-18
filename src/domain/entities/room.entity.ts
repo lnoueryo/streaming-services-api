@@ -10,4 +10,7 @@ export class Room {
       params.participants.map((participant) => new Participant(participant)) ||
       []
   }
+  isUserParticipated(userId: string) {
+    return this.participants.some((participant) => participant.id === userId)
+  }
 }

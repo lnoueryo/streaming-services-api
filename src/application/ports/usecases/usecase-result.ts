@@ -1,4 +1,4 @@
-import { CommonErrorCode } from './usecase-error'
+import { CommonErrorCode } from '../../../domain/errors/domain-error'
 
 export type UseCaseResult<T, U extends CommonErrorCode> =
   | {

@@ -3,7 +3,12 @@ import { ISpaceRepository } from 'src/application/ports/repositories/space.repos
 import { UseCaseResult } from 'src/application/ports/usecases/usecase-result'
 import { ISignalingGateway } from 'src/application/ports/gateways/signaling.gatway'
 import { GetRoomDto } from './dto/get-room.dto'
-import { UseCaseError } from 'src/application/ports/usecases/usecase-error'
+import { DomainError } from 'src/domain/errors/domain-error'
+import { Space } from 'src/domain/entities/space.entity'
+import { Room } from 'src/domain/entities/room.entity'
+import { SpaceMember } from 'src/domain/entities/space-member.entity'
+
+type ErrorType = 'forbidden' | 'not-found' | 'internal'
 
 @Injectable()
 export class EnterLobbyUseCase {
@@ -16,55 +21,71 @@ export class EnterLobbyUseCase {
 
   async do(params: {
     spaceId: string
-    user: { id: string; token: string }
-  }): Promise<UseCaseResult<GetRoomDto, 'not-found' | 'internal'>> {
+    user: { id: string; email: string; token: string }
+  }): Promise<UseCaseResult<GetRoomDto, ErrorType>> {
     try {
-      const space = await this.spaceRepository.findSpace({ id: params.spaceId })
+      const space = await this.spaceRepository.findSpace(params.spaceId)
       if (!space) {
-        return {
-          error: {
-            type: 'not-found',
-            message: 'スペースが存在しません'
-          }
-        }
+        return this.error('not-found', 'スペースが存在しません')
       }
+
+      const spaceMember = space.ensureMemberCanEnterLobby(params.user.email)
       try {
         const room = await this.signalingGateway.getRoom(params)
-        return {
-          success: new GetRoomDto(
-            {
-              id: space.id,
-              privacy: space.privacy,
-              participants: room.participants
-            },
-            params.user
-          )
-        }
+        return this.success({ space, spaceMember, room, user: params.user })
       } catch (error) {
-        if (error instanceof UseCaseError) {
+        if (error instanceof DomainError) {
           if (error.type === 'not-found') {
-            return {
-              success: new GetRoomDto(
-                {
-                  id: space.id,
-                  privacy: space.privacy,
-                  participants: []
-                },
-                params.user
-              )
-            }
+            return this.success({ space, spaceMember, user: params.user })
           }
         }
         throw error
       }
     } catch (error) {
-      Logger.error(error)
-      return {
-        error: {
-          type: 'internal',
-          message: 'Internal Server Error'
+      if (error instanceof DomainError) {
+        if (error.code === 'invitation-not-accepted') {
+          return this.error(
+            'forbidden',
+            '招待が未承認のため参加できません。招待メールを確認してください。',
+            error.code
+          )
+        }
+        if (error.type === 'forbidden') {
+          return this.error('forbidden', error.message, error.code)
         }
       }
+      Logger.error(error)
+      return this.error('internal', 'Internal Server Error')
     }
+  }
+
+  private success({
+    space,
+    spaceMember,
+    room,
+    user
+  }: {
+    space: Space
+    spaceMember: SpaceMember
+    room?: Room
+    user: { id: string }
+  }) {
+    return {
+      success: new GetRoomDto({
+        id: space.id,
+        name: space.name,
+        privacy: space.privacy,
+        membership: {
+          role: spaceMember.role,
+          status: spaceMember.status
+        },
+        participants: room?.participants || [],
+        isParticipated: room?.isUserParticipated(user.id) || false
+      })
+    }
+  }
+
+  private error(type: ErrorType, message: string, code?: string) {
+    return { error: { type, message, code } }
   }
 }

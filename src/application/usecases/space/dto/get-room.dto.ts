@@ -1,3 +1,4 @@
+import { SpaceMember } from 'src/domain/entities/space-member.entity'
 import { SpacePrivacy } from 'src/domain/entities/space.entity'
 
 export type Participant = {
@@ -9,24 +10,30 @@ export type Participant = {
 
 export class GetRoomDto {
   readonly id: string
+  readonly name?: string
   readonly privacy: SpacePrivacy
+  readonly membership: {
+    role: SpaceMember['role'],
+    status: SpaceMember['status']
+  }
   readonly participants: Participant[]
-  readonly isJoined: boolean
-  constructor(
-    params: {
-      id: string
-      privacy: SpacePrivacy
-      participants: Participant[]
+  readonly isParticipated: boolean
+  constructor(params: {
+    id: string
+    name?: string
+    privacy: SpacePrivacy
+    membership: {
+      role: SpaceMember['role'],
+      status: SpaceMember['status']
     },
-    requestUser: {
-      id: string
-    }
-  ) {
+    participants: Participant[]
+    isParticipated: boolean
+  }) {
     this.id = params.id
+    this.name = params.name
     this.privacy = params.privacy
+    this.membership = params.membership
     this.participants = params.participants
-    this.isJoined = params.participants.some(
-      (participant) => participant.id === requestUser.id
-    )
+    this.isParticipated = params.isParticipated
   }
 }

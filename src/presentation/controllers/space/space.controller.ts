@@ -21,6 +21,10 @@ import { EnterLobbyUseCase } from 'src/application/usecases/space/enter-lobby.us
 import { HttpErrorCodeException } from '../shared/http-exception'
 import { EnableEntryUseCase } from 'src/application/usecases/space/enable-entry.usecase'
 import { GetRoomResponse } from './response/get-room.response'
+import { CreateSpaceRequest } from './request/create-space.request'
+import { AcceptSpaceInviteUseCase } from 'src/application/usecases/space/accept-space-invite.usecase'
+import { AcceptSpaceInviteResponse } from './response/accept-space-invite.response'
+import { CreateSpaceResponse } from './response/create-space.response'
 
 @ApiTags('spaces')
 @Controller({
@@ -30,6 +34,7 @@ export class SpaceController {
   constructor(
     private readonly getPublicSpaceUseCase: GetPublicSpaceUseCase,
     private readonly createSpaceUseCase: CreateSpaceUseCase,
+    private readonly acceptSpaceInviteUseCase: AcceptSpaceInviteUseCase,
     private readonly enterLobbyUseCase: EnterLobbyUseCase,
     private readonly enableEntryUseCase: EnableEntryUseCase
   ) {}
@@ -45,16 +50,29 @@ export class SpaceController {
     }
     return new GetPublicSpaceResponse(result.success)
   }
-  @Post('/create')
-  @ApiResponse({ status: 201, type: GetTargetSpaceResponse })
+  @Post('/')
+  @ApiResponse({ status: 201, type: CreateSpaceResponse })
   async createSpace(
-    @AuthUser() _: AuthUserRequest
-  ): Promise<GetTargetSpaceResponse> {
-    const result = await this.createSpaceUseCase.do()
+    @Body() params: CreateSpaceRequest,
+    @AuthUser() user: AuthUserRequest
+  ): Promise<CreateSpaceResponse> {
+    const result = await this.createSpaceUseCase.do({ body: params, user })
     if ('error' in result) {
       throw new HttpErrorCodeException(result.error)
     }
-    return new GetTargetSpaceResponse(result.success)
+    return new CreateSpaceResponse(result.success)
+  }
+  @Get('/invite/:hash')
+  @ApiResponse({ status: 200, type: GetTargetSpaceResponse })
+  async acceptSpaceInvite(
+    @Param('hash') hash: string,
+    @AuthUser() user: AuthUserRequest
+  ): Promise<AcceptSpaceInviteResponse> {
+    const result = await this.acceptSpaceInviteUseCase.do({ hash, user })
+    if ('error' in result) {
+      throw new HttpErrorCodeException(result.error)
+    }
+    return new AcceptSpaceInviteResponse(result.success)
   }
   @Get('/:id/lobby')
   @ApiResponse({ status: 200, type: GetRoomResponse })

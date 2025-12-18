@@ -1,21 +1,19 @@
-import { Space } from 'src/domain/entities/space.entity'
+import { Space, SpacePrivacy } from 'src/domain/entities/space.entity'
+import { CreateSpaceMemberParam } from './space-member.repository'
 
 export const ISpaceRepository = Symbol('ISpaceRepository')
 
 export type SpaceWhere = {
-  privacy?: 'public' | 'private'
+  privacy?: SpacePrivacy
 }
 export type FindSpacesParam = SpaceWhere & {
   page: number
   limit: number
 }
-export type FindSpaceParam = {
-  id: string
-}
 
 export type ISpaceRepository = {
   findSpaces(params: FindSpacesParam): Promise<Space[]>
-  findSpace(params: FindSpaceParam): Promise<Space>
+  findSpace(id: string): Promise<Space>
   countSpaces(params: SpaceWhere)
-  create(): Promise<Space>
+  create(params: Space): Promise<Space>
 }

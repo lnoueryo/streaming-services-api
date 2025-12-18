@@ -7,7 +7,7 @@ export type CommonErrorCode =
   | 'conflict'
   | 'too-many-requests'
 
-export class UseCaseError extends Error {
+export class DomainError extends Error {
   public type: string
   public message: string
   public code?: string
