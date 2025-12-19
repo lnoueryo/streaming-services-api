@@ -1,9 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common'
-import {
-  CreateSpaceMemberParam,
-  ISpaceMemberRepository,
-  UpdateSpaceMemberParam
-} from 'src/application/ports/repositories/space-member.repository'
+import { ISpaceMemberRepository } from 'src/application/ports/repositories/space-member.repository'
 import { SpaceMember } from 'src/domain/entities/space-member.entity'
 import { IPrismaClient } from 'src/infrastructure/plugins/prisma'
 
@@ -40,7 +36,7 @@ export class SpaceMemberRepository implements ISpaceMemberRepository {
     })
     return new SpaceMember(spaceMember)
   }
-  async create(params: CreateSpaceMemberParam): Promise<SpaceMember> {
+  async create(params: SpaceMember): Promise<SpaceMember> {
     const spaceMember = await this.prisma.spaceMember.create({
       data: {
         spaceId: params.spaceId,

@@ -1,7 +1,6 @@
 import { Body, Controller, Param, ParseIntPipe, Patch } from '@nestjs/common'
 import { ApiTags, ApiResponse } from '@nestjs/swagger'
 import { AuthUser } from '../../interceptors/auth-user.decorator'
-import { Space } from 'src/domain/entities/space.entity'
 import { AuthUserRequest } from '../shared/auth.request'
 import { HttpErrorCodeException } from '../shared/http-exception'
 import { RequestEntryUseCase } from 'src/application/usecases/space-member/request-entry.usecase'
@@ -38,7 +37,11 @@ export class SpaceMemberController {
     @Body() body: DecideRequestRequest,
     @AuthUser() user: AuthUserRequest
   ): Promise<DecideRequestResponse> {
-    const result = await this.decideRequestUseCase.do({ params: { spaceId, spaceMemberId }, user, body })
+    const result = await this.decideRequestUseCase.do({
+      params: { spaceId, spaceMemberId },
+      user,
+      body
+    })
     if ('error' in result) {
       throw new HttpErrorCodeException(result.error)
     }

@@ -4,6 +4,9 @@ import { ISpaceMemberRepository } from 'src/application/ports/repositories/space
 import { UseCaseResult } from 'src/application/ports/usecases/usecase-result'
 import { EntryRequestDecisionService } from 'src/domain/services/space-member/entry-request-decision.service'
 
+
+type ErrorType = 'forbidden' | 'not-found' | 'internal'
+
 @Injectable()
 export class DecideRequestUseCase {
   constructor(
@@ -15,11 +18,16 @@ export class DecideRequestUseCase {
     params: { spaceId: string; spaceMemberId: number }
     user: { id: string; email: string }
     body: { status: 'approved' | 'rejected' }
-  }): Promise<UseCaseResult<{
-      id: number | undefined
-      role: SpaceMember['role']
-      status: SpaceMember['status']
-  }, 'forbidden' | 'not-found' | 'internal'>> {
+  }): Promise<
+    UseCaseResult<
+      {
+        id: number | undefined
+        role: SpaceMember['role']
+        status: SpaceMember['status']
+      },
+      ErrorType
+    >
+  > {
     try {
       const spaceMembers = await this.spaceMemberRepository.findMany({
         spaceId: input.params.spaceId
@@ -28,23 +36,13 @@ export class DecideRequestUseCase {
         (member) => member.userId === input.user.id
       )
       if (!actor) {
-        return {
-          error: {
-            type: 'forbidden',
-            message: 'スペースのメンバーではありません。'
-          }
-        }
+        return this.error('forbidden', 'あなたはスペースのメンバーではありません。')
       }
       const target = spaceMembers.find(
         (member) => member.id === input.params.spaceMemberId
       )
       if (!target) {
-        return {
-          error: {
-            type: 'not-found',
-            message: '指定されたスペースメンバーが見つかりません。'
-          }
-        }
+        return this.error('not-found', '対象のスペースメンバーが見つかりません。')
       }
 
       const spaceMember = this.entryRequestDecisionService.decide({
@@ -63,11 +61,14 @@ export class DecideRequestUseCase {
       }
     } catch (error) {
       Logger.error(error)
-      return {
-        error: {
-          type: 'internal',
-          message: 'Internal Server Error'
-        }
+      return this.error('internal', 'Internal Server Error')
+    }
+  }
+  private error(type: ErrorType, message: string) {
+    return {
+      error: {
+        type,
+        message
       }
     }
   }

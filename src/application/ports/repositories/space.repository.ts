@@ -1,5 +1,4 @@
 import { Space, SpacePrivacy } from 'src/domain/entities/space.entity'
-import { CreateSpaceMemberParam } from './space-member.repository'
 
 export const ISpaceRepository = Symbol('ISpaceRepository')
 

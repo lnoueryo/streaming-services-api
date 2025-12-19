@@ -51,11 +51,18 @@ export class SpaceRepository implements ISpaceRepository {
   async create(params: Space): Promise<Space> {
     const space = await this.prisma.space.create({
       data: {
+        id: params.id,
         name: params.name || null,
         privacy: params.privacy,
         creatorId: params.creatorId,
         spaceMembers: {
-          create: params.spaceMembers || []
+          create:
+            params.spaceMembers.map((member) => ({
+              userId: member.userId,
+              email: member.email,
+              role: member.role,
+              status: member.status
+            })) || []
         }
       }
     })
