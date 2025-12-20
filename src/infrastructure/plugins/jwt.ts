@@ -6,7 +6,7 @@ export class JwtFactory {
   create(secret: string, signOptions: JwtSignOptions) {
     return new JwtService({
       secret,
-      signOptions,
+      signOptions
     })
   }
 }

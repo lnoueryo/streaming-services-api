@@ -12,21 +12,21 @@ export class PrismaFactory {
         log: [
           {
             emit: 'stdout',
-            level: 'query',
+            level: 'query'
           },
           {
             emit: 'stdout',
-            level: 'error',
+            level: 'error'
           },
           {
             emit: 'stdout',
-            level: 'info',
+            level: 'info'
           },
           {
             emit: 'stdout',
-            level: 'warn',
-          },
-        ],
+            level: 'warn'
+          }
+        ]
       })
     }
     return this.prisma

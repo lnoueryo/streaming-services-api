@@ -2,7 +2,12 @@ import { firstValueFrom, Observable } from 'rxjs'
 import { DomainError } from 'src/domain/errors/domain-error'
 import { Metadata, status } from '@grpc/grpc-js'
 import type { ServiceError } from '@grpc/grpc-js'
-import { ClientGrpc, ClientOptions, ClientProxyFactory, Transport } from '@nestjs/microservices'
+import {
+  ClientGrpc,
+  ClientOptions,
+  ClientProxyFactory,
+  Transport
+} from '@nestjs/microservices'
 import { Injectable } from '@nestjs/common'
 import { JwtFactory } from './jwt'
 import { JwtService } from '@nestjs/jwt'
@@ -12,18 +17,16 @@ import { config } from 'src/config'
 export class GrpcClientFactory {
   private readonly jwt: JwtService
 
-  constructor(
-    jwtFactory: JwtFactory
-  ) {
+  constructor(jwtFactory: JwtFactory) {
     this.jwt = jwtFactory.create(config.signalingAuthJwt.secret, {
-      expiresIn: config.signalingAuthJwt.config.expiresIn,
+      expiresIn: config.signalingAuthJwt.config.expiresIn
     })
   }
   create<T extends object>(options: {
-    url: string;
-    protoPath: string;
-    package: string;
-    serviceName: string;
+    url: string
+    protoPath: string
+    package: string
+    serviceName: string
   }): T {
     const clientOptions: ClientOptions = {
       transport: Transport.GRPC,
@@ -33,13 +36,13 @@ export class GrpcClientFactory {
         protoPath: options.protoPath,
         loader: {
           defaults: true,
-          arrays: true,
-        },
-      },
-    };
+          arrays: true
+        }
+      }
+    }
 
-    const client: ClientGrpc = ClientProxyFactory.create(clientOptions) as any;
-    return this.grpcServiceProxy(client.getService<T>(options.serviceName));
+    const client: ClientGrpc = ClientProxyFactory.create(clientOptions) as any
+    return this.grpcServiceProxy(client.getService<T>(options.serviceName))
   }
 
   private grpcServiceProxy<T extends object>(service: T): T {
@@ -54,7 +57,10 @@ export class GrpcClientFactory {
 
         return async (...args: any[]) => {
           try {
-            const result$ = original.apply(target,[...args, factory.createAuthMetadata()]) as Observable<any>
+            const result$ = original.apply(target, [
+              ...args,
+              factory.createAuthMetadata()
+            ]) as Observable<any>
             return await firstValueFrom(result$)
           } catch (error) {
             if (factory.isGrpcServiceError(error)) {
@@ -63,7 +69,7 @@ export class GrpcClientFactory {
             throw error
           }
         }
-      },
+      }
     })
   }
 
@@ -78,26 +84,25 @@ export class GrpcClientFactory {
 
   private mapGrpcError(err: unknown): DomainError {
     const error = err as ServiceError
-    const errorCode =
-      error.metadata.get("error-code")?.[0]
+    const errorCode = error.metadata.get('error-code')?.[0]
     switch (error.code) {
       case status.NOT_FOUND:
         return new DomainError({
           type: 'not-found',
           code: String(errorCode) || undefined,
-          message: error.details,
+          message: error.details
         })
       case status.PERMISSION_DENIED:
         return new DomainError({
           type: 'forbidden',
           code: String(errorCode) || undefined,
-          message: error.details,
+          message: error.details
         })
       default:
         return new DomainError({
           type: 'internal',
           code: String(errorCode) || undefined,
-          message: error.details || 'Internal Server Error',
+          message: error.details || 'Internal Server Error'
         })
     }
   }
@@ -109,13 +114,10 @@ export class GrpcClientFactory {
       {
         issuer: config.signalingAuthJwt.config.issuer,
         subject: config.signalingAuthJwt.config.subject,
-        audience: config.signalingAuthJwt.config.audience,
+        audience: config.signalingAuthJwt.config.audience
       }
     )
-    md.add(
-      'authorization',
-      `Bearer ${token}`
-    )
+    md.add('authorization', `Bearer ${token}`)
     return md
   }
 }

@@ -12,7 +12,9 @@ export const httpStatusToCommonErrorCodeMap = {
   500: 'internal'
 } as const
 
-export function toCommonErrorCode(status: keyof typeof httpStatusToCommonErrorCodeMap): CommonErrorCode {
+export function toCommonErrorCode(
+  status: keyof typeof httpStatusToCommonErrorCodeMap
+): CommonErrorCode {
   return httpStatusToCommonErrorCodeMap[status] ?? 'internal'
 }
 

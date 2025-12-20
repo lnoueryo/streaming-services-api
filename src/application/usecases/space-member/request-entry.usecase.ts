@@ -2,6 +2,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common'
 import { UseCaseResult } from 'src/application/ports/usecases/usecase-result'
 import { ISpaceMemberRepository } from 'src/application/ports/repositories/space-member.repository'
 import { DomainError } from 'src/domain/errors/domain-error'
+import { ISignalingGateway } from 'src/application/ports/gateways/signaling.gateway'
 
 type ErrorType = 'forbidden' | 'internal'
 
@@ -9,7 +10,9 @@ type ErrorType = 'forbidden' | 'internal'
 export class RequestEntryUseCase {
   constructor(
     @Inject(ISpaceMemberRepository)
-    private readonly spaceMemberRepository: ISpaceMemberRepository
+    private readonly spaceMemberRepository: ISpaceMemberRepository,
+    @Inject(ISignalingGateway)
+    private readonly signalingGateway: ISignalingGateway
   ) {}
   async do(input: {
     spaceId: string
@@ -25,8 +28,20 @@ export class RequestEntryUseCase {
       }
       // TODO: approvedでリクエストの可能性があるので、こちらで返すステータスをフロントに反映させるべき。approvedをpendingで上書きする可能性あり
       spaceMember.requestEntry()
-      await this.spaceMemberRepository.update(spaceMember)
-      // TODO: gRPCでsignalingサーバーに参加リクエストを送信する
+      const updatedSpaceMember =
+        await this.spaceMemberRepository.update(spaceMember)
+
+      await this.signalingGateway.requestEntry({
+        spaceId: input.spaceId,
+        spaceMember: {
+          id: updatedSpaceMember.id!,
+          spaceId: updatedSpaceMember.spaceId!,
+          userId: updatedSpaceMember.userId!,
+          email: updatedSpaceMember.email!,
+          role: updatedSpaceMember.role,
+          status: updatedSpaceMember.status
+        }
+      })
       return {
         success: true
       }

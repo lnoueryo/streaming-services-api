@@ -1,9 +1,9 @@
 import { Inject, Injectable, Logger } from '@nestjs/common'
 import { SpaceMember } from '@prisma/client'
+import { ISignalingGateway } from 'src/application/ports/gateways/signaling.gateway'
 import { ISpaceMemberRepository } from 'src/application/ports/repositories/space-member.repository'
 import { UseCaseResult } from 'src/application/ports/usecases/usecase-result'
 import { EntryRequestDecisionService } from 'src/domain/services/space-member/entry-request-decision.service'
-
 
 type ErrorType = 'forbidden' | 'not-found' | 'internal'
 
@@ -13,7 +13,9 @@ export class DecideRequestUseCase {
     @Inject(ISpaceMemberRepository)
     private readonly spaceMemberRepository: ISpaceMemberRepository,
     @Inject(EntryRequestDecisionService)
-    private readonly entryRequestDecisionService: EntryRequestDecisionService
+    private readonly entryRequestDecisionService: EntryRequestDecisionService,
+    @Inject(ISignalingGateway)
+    private readonly signalingGateway: ISignalingGateway
   ) {}
   async do(input: {
     params: { spaceId: string; spaceMemberId: number }
@@ -37,13 +39,19 @@ export class DecideRequestUseCase {
         (member) => member.userId === input.user.id
       )
       if (!actor) {
-        return this.error('forbidden', 'あなたはスペースのメンバーではありません。')
+        return this.error(
+          'forbidden',
+          'あなたはスペースのメンバーではありません。'
+        )
       }
       const target = spaceMembers.find(
         (member) => member.id === input.params.spaceMemberId
       )
       if (!target) {
-        return this.error('not-found', '対象のスペースメンバーが見つかりません。')
+        return this.error(
+          'not-found',
+          '対象のスペースメンバーが見つかりません。'
+        )
       }
 
       const spaceMember = this.entryRequestDecisionService.decide({
@@ -53,6 +61,14 @@ export class DecideRequestUseCase {
       })
       const updatedMember = await this.spaceMemberRepository.update(spaceMember)
       // TODO: gRPCでsignalingサーバーに参加リクエストを送信する
+      await this.signalingGateway.decideRequest({
+        id: updatedMember.id!,
+        spaceId: updatedMember.spaceId,
+        userId: updatedMember.userId!,
+        email: updatedMember.email,
+        role: updatedMember.role,
+        status: updatedMember.status
+      })
       return {
         success: {
           id: updatedMember.id!,

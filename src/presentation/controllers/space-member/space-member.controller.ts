@@ -7,6 +7,13 @@ import { RequestEntryUseCase } from 'src/application/usecases/space-member/reque
 import { DecideRequestRequest } from './request/decide-request.request'
 import { DecideRequestUseCase } from 'src/application/usecases/space-member/decide-request.usecase'
 import { DecideRequestResponse } from './response/decide-request.response'
+import { GrpcMethod, RpcException } from '@nestjs/microservices'
+import {
+  GetSpaceMemberRequest,
+  GetSpaceMemberResponse
+} from 'src/proto/application'
+import { GetSpaceMemberUseCase } from 'src/application/usecases/space-member/get-space-member.usecase'
+import { getGrpcStatus } from '../shared/grpc-status-mapper'
 
 @ApiTags('space-members')
 @Controller({
@@ -15,7 +22,8 @@ import { DecideRequestResponse } from './response/decide-request.response'
 export class SpaceMemberController {
   constructor(
     private readonly requestEntryUseCase: RequestEntryUseCase,
-    private readonly decideRequestUseCase: DecideRequestUseCase
+    private readonly decideRequestUseCase: DecideRequestUseCase,
+    private readonly getSpaceMemberUseCase: GetSpaceMemberUseCase
   ) {}
   @Patch('/:spaceId/request')
   @ApiResponse({ status: 200, type: Boolean })
@@ -46,5 +54,22 @@ export class SpaceMemberController {
       throw new HttpErrorCodeException(result.error)
     }
     return new DecideRequestResponse(result.success)
+  }
+
+  @GrpcMethod('SpaceService', 'GetSpaceMember')
+  async getSpaceMember(
+    data: GetSpaceMemberRequest
+  ): Promise<GetSpaceMemberResponse> {
+    const result = await this.getSpaceMemberUseCase.do({
+      spaceId: data.spaceId,
+      userId: data.userId
+    })
+    if ('error' in result) {
+      throw new RpcException({
+        message: result.error.message,
+        code: getGrpcStatus(result.error.type)
+      })
+    }
+    return result.success
   }
 }

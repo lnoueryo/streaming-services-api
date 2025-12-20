@@ -6,13 +6,21 @@ import { SpaceMemberController } from './space-member.controller'
 import { RequestEntryUseCase } from 'src/application/usecases/space-member/request-entry.usecase'
 import { DecideRequestUseCase } from 'src/application/usecases/space-member/decide-request.usecase'
 import { EntryRequestDecisionService } from 'src/domain/services/space-member/entry-request-decision.service'
+import { ISignalingGateway } from 'src/application/ports/gateways/signaling.gateway'
+import { SignalingGateway } from 'src/infrastructure/gateways/grpc/signaling.gateway'
+import { GrpcClientFactory } from 'src/infrastructure/plugins/micro-services'
+import { JwtFactory } from 'src/infrastructure/plugins/jwt'
+import { GetSpaceMemberUseCase } from 'src/application/usecases/space-member/get-space-member.usecase'
 
 @Module({
   controllers: [SpaceMemberController],
   providers: [
     RequestEntryUseCase,
     DecideRequestUseCase,
+    GetSpaceMemberUseCase,
     EntryRequestDecisionService,
+    GrpcClientFactory,
+    JwtFactory,
     PrismaFactory,
     {
       provide: ISpaceMemberRepository,
@@ -22,7 +30,11 @@ import { EntryRequestDecisionService } from 'src/domain/services/space-member/en
       provide: 'EntryRequestDecisionService',
       useClass: EntryRequestDecisionService
     },
+    {
+      provide: ISignalingGateway,
+      useClass: SignalingGateway
+    }
   ],
-  exports: [ISpaceMemberRepository]
+  exports: [ISpaceMemberRepository, ISignalingGateway]
 })
 export class SpaceMemberModule {}

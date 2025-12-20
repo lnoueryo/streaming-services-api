@@ -39,6 +39,20 @@ export class SpaceMemberRepository implements ISpaceMemberRepository {
     })
     return spaceMember ? new SpaceMember(spaceMember) : null
   }
+  async findByUserId(params: {
+    spaceId: string
+    userId: string
+  }): Promise<SpaceMember | null> {
+    const spaceMember = await this.prisma.spaceMember.findUnique({
+      where: {
+        spaceId_userId: {
+          spaceId: params.spaceId,
+          userId: params.userId
+        }
+      }
+    })
+    return spaceMember ? new SpaceMember(spaceMember) : null
+  }
   async create(params: SpaceMember): Promise<SpaceMember> {
     const spaceMember = await this.prisma.spaceMember.create({
       data: {

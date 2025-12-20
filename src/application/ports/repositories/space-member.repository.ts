@@ -11,6 +11,10 @@ export type ISpaceMemberRepository = {
     spaceId: string
     email: string
   }): Promise<SpaceMember | null>
+  findByUserId(params: {
+    spaceId: string
+    userId: string
+  }): Promise<SpaceMember | null>
   create(params: SpaceMember): Promise<SpaceMember>
   update(params: SpaceMember): Promise<SpaceMember>
   upsert(params: SpaceMember): Promise<SpaceMember>

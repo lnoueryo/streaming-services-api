@@ -1,4 +1,4 @@
-import { join } from "path"
+import { join } from 'path'
 
 type Config = {
   appSecret: string
@@ -35,16 +35,19 @@ const config: Config = {
       issuer: 'app-server',
       audience: 'signaling-server',
       subject: 'app-server',
-      expiresIn: 60,  // 60 seconds
+      expiresIn: 60 // 60 seconds
     },
-    secret: process.env.SIGNALING_SERVER_SECRET,
+    secret: process.env.SIGNALING_SERVER_SECRET
   }
 }
 
 type ConfigEnv = {
   allowOrigin: string
   signalingApiOrigin: string
-  protoPath: string
+  protoPath: {
+    signaling: string
+    application: string
+  }
 }
 
 type STAGE = 'development' | 'production'
@@ -54,12 +57,18 @@ const configEnvs: { [K in STAGE]: ConfigEnv } = {
     allowOrigin: 'https://streaming.localtest.me',
     // signalingApiOrigin: 'http://streaming-signaling:8080',
     signalingApiOrigin: 'streaming-signaling:50051',
-    protoPath: join(process.cwd(), 'proto/signaling.proto')
+    protoPath: {
+      signaling: join(process.cwd(), 'src/proto/signaling.proto'),
+      application: join(process.cwd(), 'src/proto/application.proto')
+    }
   },
   production: {
     allowOrigin: 'https://streaming.jounetsism.biz',
     signalingApiOrigin: 'https://streaming-signaling.jounetsism.biz',
-    protoPath: join(process.cwd(), 'proto/signaling.proto')
+    protoPath: {
+      signaling: join(process.cwd(), 'src/proto/signaling.proto'),
+      application: join(process.cwd(), 'src/proto/application.proto')
+    }
   }
 }
 const env = (process.env.NODE_ENV || 'development') as STAGE

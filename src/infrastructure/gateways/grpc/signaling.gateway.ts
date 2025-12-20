@@ -11,17 +11,15 @@ export class SignalingGateway implements ISignalingGateway {
   constructor(private factory: GrpcClientFactory) {
     this.roomService = this.factory.create<IRoomService>({
       url: config.signalingApiOrigin,
-      protoPath: config.protoPath,
+      protoPath: config.protoPath.signaling,
       package: 'signaling',
-      serviceName: 'RoomService',
+      serviceName: 'RoomService'
     })
   }
 
-  async getRoom(params: {
-    spaceId: string
-  }): Promise<Room> {
+  async getRoom(params: { spaceId: string }): Promise<Room> {
     const response = await this.roomService.getRoom({
-      spaceId: params.spaceId,
+      spaceId: params.spaceId
     })
     return new Room(response)
   }
@@ -32,8 +30,45 @@ export class SignalingGateway implements ISignalingGateway {
   }): Promise<Room> {
     const response = await this.roomService.removeParticipant({
       spaceId: params.spaceId,
-      userId: params.user.id,
+      userId: params.user.id
     })
     return new Room(response)
+  }
+
+  async requestEntry(params: {
+    spaceId: string
+    spaceMember: {
+      id: number
+      spaceId: string
+      userId: string
+      email: string
+      role: string
+      status: string
+    }
+  }): Promise<void> {
+    await this.roomService.requestEntry({
+      spaceId: params.spaceId,
+      spaceMember: params.spaceMember
+    })
+    return
+  }
+
+  async decideRequest(params: {
+    id: number
+    spaceId: string
+    userId: string
+    email: string
+    role: string
+    status: string
+  }): Promise<void> {
+    await this.roomService.decideRequest({
+      id: params.id,
+      spaceId: params.spaceId,
+      userId: params.userId,
+      email: params.email,
+      role: params.role,
+      status: params.status
+    })
+    return
   }
 }

@@ -41,7 +41,7 @@ import { GrpcClientFactory } from 'src/infrastructure/plugins/micro-services'
     {
       provide: ISignalingGateway,
       useClass: SignalingGateway
-    },
+    }
   ],
   exports: [ISpaceRepository, ISignalingGateway]
 })
