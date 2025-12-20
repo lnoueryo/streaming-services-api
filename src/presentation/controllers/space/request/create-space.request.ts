@@ -21,10 +21,10 @@ export enum SpaceRole {
 
 class MemberRequest {
   @IsEmail({}, { message: '有効な email を指定してください' })
-  readonly email: string
+  readonly email!: string
 
   @IsEnum(SpaceRole, { message: 'role は admin | member のいずれかです' })
-  readonly role: SpaceRole
+  readonly role!: SpaceRole
 }
 
 export class CreateSpaceRequest {
@@ -33,7 +33,7 @@ export class CreateSpaceRequest {
   readonly name?: string
 
   @IsEnum(SpacePrivacy, { message: 'privacy は public | private です' })
-  readonly privacy: SpacePrivacy
+  readonly privacy!: SpacePrivacy
 
   @IsOptional()
   @IsArray()

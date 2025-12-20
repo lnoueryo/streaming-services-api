@@ -7,7 +7,7 @@ export class AcceptSpaceInviteResponse {
   constructor(params: {
     space: {
       id: string
-      name?: string
+      name?: string | null
       privacy: string
     }
     redirect: string

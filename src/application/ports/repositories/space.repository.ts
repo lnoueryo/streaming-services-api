@@ -12,7 +12,7 @@ export type FindSpacesParam = SpaceWhere & {
 
 export type ISpaceRepository = {
   findSpaces(params: FindSpacesParam): Promise<Space[]>
-  findSpace(id: string): Promise<Space>
-  countSpaces(params: SpaceWhere)
+  findSpace(id: string): Promise<Space | null>
+  countSpaces(params: SpaceWhere): Promise<number>
   create(params: Space): Promise<Space>
 }

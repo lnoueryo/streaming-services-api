@@ -18,7 +18,7 @@ export class InviteSpaceService {
     })
   }
 
-  decode(hash: string): InvitePayload | undefined {
+  decode(hash: string): InvitePayload {
     try {
       return this.jwtService.verify<InvitePayload>(hash)
     } catch (error) {

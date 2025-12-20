@@ -6,11 +6,14 @@ import {
 } from 'src/application/ports/repositories/space.repository'
 import { SpaceMember } from 'src/domain/entities/space-member.entity'
 import { Space } from 'src/domain/entities/space.entity'
-import { IPrismaClient } from 'src/infrastructure/plugins/prisma'
+import { IPrismaClient, PrismaFactory } from 'src/infrastructure/plugins/prisma'
 
 @Injectable()
 export class SpaceRepository implements ISpaceRepository {
-  constructor(@Inject('PRISMA') private readonly prisma: IPrismaClient) {}
+  private readonly prisma: IPrismaClient
+  constructor(private readonly factory: PrismaFactory) {
+    this.prisma = this.factory.create()
+  }
   async findSpaces(params: FindSpacesParam) {
     const spaces = await this.prisma.space.findMany({
       where: { privacy: params.privacy },

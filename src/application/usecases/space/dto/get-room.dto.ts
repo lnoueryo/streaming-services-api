@@ -10,7 +10,7 @@ export type Participant = {
 
 export class GetRoomDto {
   readonly id: string
-  readonly name?: string
+  readonly name?: string | null
   readonly privacy: SpacePrivacy
   readonly membership: {
     role: SpaceMember['role']
@@ -20,7 +20,7 @@ export class GetRoomDto {
   readonly isParticipated: boolean
   constructor(params: {
     id: string
-    name?: string
+    name?: string | null
     privacy: SpacePrivacy
     membership: {
       role: SpaceMember['role']

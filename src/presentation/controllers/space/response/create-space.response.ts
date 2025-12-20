@@ -7,7 +7,7 @@ export class CreateSpaceResponse {
   constructor(params: {
     space: {
       id: string
-      name?: string
+      name?: string | null
       privacy: string
     }
     url: string

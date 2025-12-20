@@ -18,7 +18,7 @@ export class LoggingInterceptor {
       const reset = '\x1b[0m'
 
       // ステータスコードで色分け
-      const log = (message) => {
+      const log = (message: string) => {
         if (statusCode >= 400) Logger.error(message)
         else if (statusCode >= 300) Logger.warn(message)
         else Logger.log(message)

@@ -6,9 +6,9 @@ export type ISignalingGateway = {
   getRoom: (params: {
     spaceId: string
     user: { id: string; token: string }
-  }) => Promise<Room | null>
+  }) => Promise<Room>
   deleteRtcClient: (params: {
     spaceId: string
     user: { id: string; token: string }
-  }) => Promise<Room | null>
+  }) => Promise<Room>
 }

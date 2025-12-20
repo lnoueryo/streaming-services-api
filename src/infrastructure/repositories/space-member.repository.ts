@@ -1,18 +1,21 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { ISpaceMemberRepository } from 'src/application/ports/repositories/space-member.repository'
 import { SpaceMember } from 'src/domain/entities/space-member.entity'
-import { IPrismaClient } from 'src/infrastructure/plugins/prisma'
+import { IPrismaClient, PrismaFactory } from 'src/infrastructure/plugins/prisma'
 
 @Injectable()
 export class SpaceMemberRepository implements ISpaceMemberRepository {
-  constructor(@Inject('PRISMA') private readonly prisma: IPrismaClient) {}
-  async find(id: number): Promise<SpaceMember> {
+  private readonly prisma: IPrismaClient
+  constructor(private readonly factory: PrismaFactory) {
+    this.prisma = this.factory.create()
+  }
+  async find(id: number): Promise<SpaceMember | null> {
     const spaceMember = await this.prisma.spaceMember.findUnique({
       where: {
         id
       }
     })
-    return new SpaceMember(spaceMember)
+    return spaceMember ? new SpaceMember(spaceMember) : null
   }
   async findMany(criteria: { spaceId?: string }): Promise<SpaceMember[]> {
     const spaceMembers = await this.prisma.spaceMember.findMany({
@@ -34,7 +37,7 @@ export class SpaceMemberRepository implements ISpaceMemberRepository {
         }
       }
     })
-    return new SpaceMember(spaceMember)
+    return spaceMember ? new SpaceMember(spaceMember) : null
   }
   async create(params: SpaceMember): Promise<SpaceMember> {
     const spaceMember = await this.prisma.spaceMember.create({

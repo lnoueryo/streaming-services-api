@@ -7,20 +7,20 @@ export type MemberStatus = 'approved' | 'pending' | 'rejected' | 'none'
 export class SpaceMember extends BaseEntity {
   readonly id?: number
   readonly spaceId: string
-  private _userId?: string
+  private _userId?: string | null
   readonly email: string
   readonly role: MemberRole
   private _status: MemberStatus
-  private _joinedAt?: Date
+  private _joinedAt?: Date | null
 
   constructor(params: {
     id?: number
     spaceId: string
-    userId?: string
+    userId?: string | null
     email: string
     role: MemberRole
     status: MemberStatus
-    joinedAt?: Date
+    joinedAt?: Date | null
     createdAt?: Date
     updatedAt?: Date
   }) {

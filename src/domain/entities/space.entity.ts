@@ -6,14 +6,14 @@ import { v7 as uuidv7 } from 'uuid'
 export type SpacePrivacy = 'public' | 'protected' | 'private'
 export class Space extends BaseEntity {
   readonly id: string
-  readonly name?: string
+  readonly name?: string | null
   readonly privacy: SpacePrivacy
   readonly creatorId: string
   readonly spaceMembers: SpaceMember[]
 
   constructor(params: {
     id?: string
-    name?: string
+    name?: string | null
     privacy: SpacePrivacy
     creatorId: string
     spaceMembers?: SpaceMember[]
@@ -42,7 +42,7 @@ export class Space extends BaseEntity {
   allowMemberToAcceptProtectedInvitation(
     userId: string,
     email: string
-  ): SpaceMember | null {
+  ): SpaceMember | undefined {
     if (!this.isProtected()) {
       throw new DomainError({
         type: 'internal',
@@ -171,7 +171,7 @@ export class Space extends BaseEntity {
     }
     return spaceMember
   }
-  ensureMemberCanEnterRoom(email: string): SpaceMember {
+  ensureMemberCanEnterRoom(email: string): SpaceMember | undefined {
     const spaceMember = this.ensureMemberCanEnterLobby(email)
     if (!spaceMember) {
       return

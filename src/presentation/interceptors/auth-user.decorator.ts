@@ -18,7 +18,7 @@ export const AuthUser = createParamDecorator(
   }
 )
 
-const authByCookieSession = async (req) => {
+const authByCookieSession = async (req: any) => {
   const sessionCookie = req.cookies?.session
 
   if (!sessionCookie) {
@@ -41,7 +41,7 @@ const authByCookieSession = async (req) => {
   }
 }
 
-const authByAuthorization = async (req) => {
+const authByAuthorization = async (req: any) => {
   const authHeader = req.headers.authorization
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     throw new UnauthorizedException('No token provided')

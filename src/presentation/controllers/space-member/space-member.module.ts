@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common'
-import { prisma } from '../../../infrastructure/plugins/prisma'
+import { PrismaFactory } from '../../../infrastructure/plugins/prisma'
 import { ISpaceMemberRepository } from 'src/application/ports/repositories/space-member.repository'
 import { SpaceMemberRepository } from 'src/infrastructure/repositories/space-member.repository'
 import { SpaceMemberController } from './space-member.controller'
@@ -13,6 +13,7 @@ import { EntryRequestDecisionService } from 'src/domain/services/space-member/en
     RequestEntryUseCase,
     DecideRequestUseCase,
     EntryRequestDecisionService,
+    PrismaFactory,
     {
       provide: ISpaceMemberRepository,
       useClass: SpaceMemberRepository
@@ -21,10 +22,6 @@ import { EntryRequestDecisionService } from 'src/domain/services/space-member/en
       provide: 'EntryRequestDecisionService',
       useClass: EntryRequestDecisionService
     },
-    {
-      provide: 'PRISMA',
-      useValue: prisma
-    }
   ],
   exports: [ISpaceMemberRepository]
 })

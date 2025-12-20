@@ -21,7 +21,7 @@ export class DecideRequestUseCase {
   }): Promise<
     UseCaseResult<
       {
-        id: number | undefined
+        id: number
         role: SpaceMember['role']
         status: SpaceMember['status']
       },
@@ -50,13 +50,13 @@ export class DecideRequestUseCase {
         target,
         decision: input.body.status
       })
-      await this.spaceMemberRepository.update(spaceMember)
+      const updatedMember = await this.spaceMemberRepository.update(spaceMember)
       // TODO: gRPCでsignalingサーバーに参加リクエストを送信する
       return {
         success: {
-          id: spaceMember.id,
-          role: spaceMember.role,
-          status: spaceMember.status
+          id: updatedMember.id!,
+          role: updatedMember.role,
+          status: updatedMember.status
         }
       }
     } catch (error) {

@@ -34,7 +34,7 @@ export class CreateSpaceUseCase {
         space: {
           id: string
           privacy: SpacePrivacy
-          name?: string
+          name?: string | null
         }
         url: string
       },
@@ -59,7 +59,7 @@ export class CreateSpaceUseCase {
             data: { uid: string } | null
           }>
         > = []
-        for (const member of params.body.members) {
+        for (const member of params.body.members ?? []) {
           fetchUsers.push(
             auth
               .getUserByEmail(member.email)

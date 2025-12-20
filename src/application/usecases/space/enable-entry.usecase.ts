@@ -1,7 +1,7 @@
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common'
 import { ISpaceRepository } from 'src/application/ports/repositories/space.repository'
 import { UseCaseResult } from 'src/application/ports/usecases/usecase-result'
-import { ISignalingGateway } from 'src/application/ports/gateways/signaling.gatway'
+import { ISignalingGateway } from 'src/application/ports/gateways/signaling.gateway'
 import { GetRoomDto } from './dto/get-room.dto'
 import { DomainError } from 'src/domain/errors/domain-error'
 import { Space, SpacePrivacy } from 'src/domain/entities/space.entity'
@@ -46,6 +46,9 @@ export class EnableEntryUseCase {
       }
 
       const spaceMember = space.ensureMemberCanEnterRoom(params.user.email)
+      if (!spaceMember) {
+        return this.success({ space, user: params.user })
+      }
       try {
         if (params.body.force) {
           await this.signalingGateway.deleteRtcClient(params)
@@ -99,7 +102,7 @@ export class EnableEntryUseCase {
     user
   }: {
     space: Space
-    spaceMember: SpaceMember
+    spaceMember?: SpaceMember
     room?: Room
     user: { id: string }
   }) {
@@ -109,8 +112,8 @@ export class EnableEntryUseCase {
         name: space.name,
         privacy: space.privacy,
         membership: {
-          role: spaceMember.role,
-          status: spaceMember.status
+          role: spaceMember?.role || 'member',
+          status: spaceMember?.status || 'approved'
         },
         participants: room?.participants || [],
         isParticipated: room?.isUserParticipated(user.id) || false

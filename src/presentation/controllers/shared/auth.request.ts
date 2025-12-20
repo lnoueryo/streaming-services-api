@@ -12,9 +12,9 @@ export class AuthUserRequest {
     session?: string
   }) {
     this.id = decodedIdToken.id
-    this.email = decodedIdToken.email
-    this.name = decodedIdToken.name
-    this.token = decodedIdToken.token
-    this.session = decodedIdToken.session
+    this.email = decodedIdToken.email!
+    this.name = decodedIdToken.name!
+    this.token = decodedIdToken.token!
+    this.session = decodedIdToken.session!
   }
 }

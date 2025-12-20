@@ -10,7 +10,7 @@ type AcceptSpaceInviteUseCaseResult = {
   redirect: string
   space: {
     id: string
-    name?: string
+    name?: string | null
     privacy: string
   }
 }
@@ -60,6 +60,7 @@ export class AcceptSpaceInviteUseCase {
         }
         return this.success(space)
       }
+      return this.error('internal', 'サーバーエラーが発生しました')
     } catch (error) {
       if (error instanceof DomainError) {
         if (error.type === 'validation') {
