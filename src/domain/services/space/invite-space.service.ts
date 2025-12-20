@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
-import output from 'src/config'
+import { config } from 'src/config'
 import { Space } from 'src/domain/entities/space.entity'
 import { DomainError } from 'src/domain/errors/domain-error'
 import { JwtFactory } from 'src/infrastructure/plugins/jwt'
@@ -14,7 +14,7 @@ type InvitePayload = {
 export class InviteSpaceService {
   private readonly jwt: JwtService
   constructor(private readonly jwtFactory: JwtFactory) {
-    this.jwt = this.jwtFactory.create(output.appSecret, { expiresIn: 14400 })
+    this.jwt = this.jwtFactory.create(config.appSecret, { expiresIn: 14400 })
   }
 
   generate(space: Space): string {

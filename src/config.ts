@@ -74,4 +74,4 @@ const output = {
   env
 }
 
-export default output
+export { output as config }

@@ -6,7 +6,7 @@ import { ClientGrpc, ClientOptions, ClientProxyFactory, Transport } from '@nestj
 import { Injectable } from '@nestjs/common'
 import { JwtFactory } from './jwt'
 import { JwtService } from '@nestjs/jwt'
-import output from 'src/config'
+import { config } from 'src/config'
 
 @Injectable()
 export class GrpcClientFactory {
@@ -15,8 +15,8 @@ export class GrpcClientFactory {
   constructor(
     jwtFactory: JwtFactory
   ) {
-    this.jwt = jwtFactory.create(output.signalingAuthJwt.secret, {
-      expiresIn: output.signalingAuthJwt.config.expiresIn,
+    this.jwt = jwtFactory.create(config.signalingAuthJwt.secret, {
+      expiresIn: config.signalingAuthJwt.config.expiresIn,
     })
   }
   create<T extends object>(options: {
@@ -107,9 +107,9 @@ export class GrpcClientFactory {
     const token = this.jwt.sign(
       {},
       {
-        issuer: output.signalingAuthJwt.config.issuer,
-        subject: output.signalingAuthJwt.config.subject,
-        audience: output.signalingAuthJwt.config.audience,
+        issuer: config.signalingAuthJwt.config.issuer,
+        subject: config.signalingAuthJwt.config.subject,
+        audience: config.signalingAuthJwt.config.audience,
       }
     )
     md.add(
