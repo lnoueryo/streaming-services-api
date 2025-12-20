@@ -7,17 +7,17 @@ import { SpaceRepository } from 'src/infrastructure/repositories/space.repositor
 import { PrismaFactory } from '../../../infrastructure/plugins/prisma'
 import { EnterLobbyUseCase } from 'src/application/usecases/space/enter-lobby.usecase'
 import { ISignalingGateway } from 'src/application/ports/gateways/signaling.gateway'
-import { SignalingGateway } from 'src/infrastructure/gateways/http/signaling.gateway'
+import { SignalingGateway } from 'src/infrastructure/gateways/grpc/signaling.gateway'
 import { EnableEntryUseCase } from 'src/application/usecases/space/enable-entry.usecase'
 import { AcceptSpaceInviteUseCase } from 'src/application/usecases/space/accept-space-invite.usecase'
 import { InviteSpaceService } from 'src/domain/services/space/invite-space.service'
 import { ISpaceMemberRepository } from 'src/application/ports/repositories/space-member.repository'
 import { SpaceMemberRepository } from 'src/infrastructure/repositories/space-member.repository'
-import { JWTModule } from 'src/infrastructure/modules/jwt.module'
 import { AxiosFactory } from 'src/infrastructure/plugins/axios'
+import { JwtFactory } from 'src/infrastructure/plugins/jwt'
+import { GrpcClientFactory } from 'src/infrastructure/plugins/micro-services'
 
 @Module({
-  imports: [JWTModule],
   controllers: [SpaceController],
   providers: [
     CreateSpaceUseCase,
@@ -27,6 +27,8 @@ import { AxiosFactory } from 'src/infrastructure/plugins/axios'
     EnableEntryUseCase,
     AxiosFactory,
     PrismaFactory,
+    JwtFactory,
+    GrpcClientFactory,
     InviteSpaceService,
     {
       provide: ISpaceRepository,
@@ -39,10 +41,6 @@ import { AxiosFactory } from 'src/infrastructure/plugins/axios'
     {
       provide: ISignalingGateway,
       useClass: SignalingGateway
-    },
-    {
-      provide: 'InviteSpaceService',
-      useClass: InviteSpaceService
     },
   ],
   exports: [ISpaceRepository, ISignalingGateway]

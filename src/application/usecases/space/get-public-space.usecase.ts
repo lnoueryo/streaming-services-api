@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common'
+import { Inject, Injectable, Logger } from '@nestjs/common'
 import { ISpaceRepository } from 'src/application/ports/repositories/space.repository'
 import { UseCaseResult } from 'src/application/ports/usecases/usecase-result'
 import { GetPublicSpaceDto } from './dto/get-public-space.dto'
@@ -6,7 +6,7 @@ import { GetPublicSpaceDto } from './dto/get-public-space.dto'
 @Injectable()
 export class GetPublicSpaceUseCase {
   constructor(
-    @Inject(forwardRef(() => ISpaceRepository))
+    @Inject(ISpaceRepository)
     private readonly spaceRepository: ISpaceRepository
   ) {}
 

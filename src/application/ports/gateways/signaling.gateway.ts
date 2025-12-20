@@ -5,10 +5,9 @@ export const ISignalingGateway = Symbol('ISignalingGateway')
 export type ISignalingGateway = {
   getRoom: (params: {
     spaceId: string
-    user: { id: string; token: string }
   }) => Promise<Room>
-  deleteRtcClient: (params: {
+  removeParticipant: (params: {
     spaceId: string
-    user: { id: string; token: string }
+    user: { id: string }
   }) => Promise<Room>
 }

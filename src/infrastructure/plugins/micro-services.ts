@@ -1,70 +1,121 @@
 import { firstValueFrom, Observable } from 'rxjs'
-import { DomainError } from 'src/domain/errors/grpc-error'
+import { DomainError } from 'src/domain/errors/domain-error'
 import { Metadata, status } from '@grpc/grpc-js'
 import type { ServiceError } from '@grpc/grpc-js'
-export function grpcServiceProxy<T extends object>(service: T, tokenGenerator: () => string): T {
-  return new Proxy(service, {
-    get(target, prop) {
-      const original = target[prop as keyof T]
+import { ClientGrpc, ClientOptions, ClientProxyFactory, Transport } from '@nestjs/microservices'
+import { Injectable } from '@nestjs/common'
+import { JwtFactory } from './jwt'
+import { JwtService } from '@nestjs/jwt'
+import output from 'src/config'
 
-      if (typeof original !== 'function') {
-        return original
-      }
+@Injectable()
+export class GrpcClientFactory {
+  private readonly jwt: JwtService
 
-      return async (...args: any[]) => {
-        try {
-          const result$ = original.apply(target,[...args, createAuthMetadata(tokenGenerator())]) as Observable<any>
-          return await firstValueFrom(result$)
-        } catch (error) {
-          if (isGrpcServiceError(error)) {
-            throw mapGrpcError(error)
-          }
-          throw error
-        }
-      }
-    },
-  })
-}
-
-function isGrpcServiceError(error: unknown): error is { code: number } {
-  return (
-    typeof error === 'object' &&
-    error !== null &&
-    'code' in error &&
-    typeof (error as any).code === 'number'
-  )
-}
-
-export function mapGrpcError(err: unknown): DomainError {
-  const error = err as ServiceError
-  const [errorCode] = error.metadata.get('error-code')
-  switch (error.code) {
-    case status.NOT_FOUND:
-      return new DomainError({
-        type: 'not-found',
-        code: String(errorCode),
-        message: error.message,
-      })
-    case status.PERMISSION_DENIED:
-      return new DomainError({
-        type: 'forbidden',
-        code: String(errorCode) || undefined,
-        message: error.message,
-      })
-    default:
-      return new DomainError({
-        type: 'internal',
-        code: String(errorCode) || undefined,
-        message: error.message || 'Internal Server Error',
-      })
+  constructor(
+    jwtFactory: JwtFactory
+  ) {
+    this.jwt = jwtFactory.create(output.signalingAuthJwt.secret, {
+      expiresIn: output.signalingAuthJwt.config.expiresIn,
+    })
   }
-}
+  create<T extends object>(options: {
+    url: string;
+    protoPath: string;
+    package: string;
+    serviceName: string;
+  }): T {
+    const clientOptions: ClientOptions = {
+      transport: Transport.GRPC,
+      options: {
+        url: options.url,
+        package: options.package,
+        protoPath: options.protoPath,
+        loader: {
+          defaults: true,
+          arrays: true,
+        },
+      },
+    };
 
-function createAuthMetadata(token: string) {
-  const md = new Metadata()
-  md.add(
-    'authorization',
-    `Bearer ${token}`
-  )
-  return md
+    const client: ClientGrpc = ClientProxyFactory.create(clientOptions) as any;
+    return this.grpcServiceProxy(client.getService<T>(options.serviceName));
+  }
+
+  private grpcServiceProxy<T extends object>(service: T): T {
+    const factory = this
+    return new Proxy(service, {
+      get(target, prop) {
+        const original = target[prop as keyof T]
+
+        if (typeof original !== 'function') {
+          return original
+        }
+
+        return async (...args: any[]) => {
+          try {
+            const result$ = original.apply(target,[...args, factory.createAuthMetadata()]) as Observable<any>
+            return await firstValueFrom(result$)
+          } catch (error) {
+            if (factory.isGrpcServiceError(error)) {
+              throw factory.mapGrpcError(error)
+            }
+            throw error
+          }
+        }
+      },
+    })
+  }
+
+  private isGrpcServiceError(error: unknown): error is { code: number } {
+    return (
+      typeof error === 'object' &&
+      error !== null &&
+      'code' in error &&
+      typeof (error as any).code === 'number'
+    )
+  }
+
+  private mapGrpcError(err: unknown): DomainError {
+    const error = err as ServiceError
+    const errorCode =
+      error.metadata.get("error-code")?.[0]
+    switch (error.code) {
+      case status.NOT_FOUND:
+        return new DomainError({
+          type: 'not-found',
+          code: String(errorCode) || undefined,
+          message: error.details,
+        })
+      case status.PERMISSION_DENIED:
+        return new DomainError({
+          type: 'forbidden',
+          code: String(errorCode) || undefined,
+          message: error.details,
+        })
+      default:
+        return new DomainError({
+          type: 'internal',
+          code: String(errorCode) || undefined,
+          message: error.details || 'Internal Server Error',
+        })
+    }
+  }
+
+  private createAuthMetadata(): Metadata {
+    const md = new Metadata()
+    const token = this.jwt.sign(
+      {},
+      {
+        issuer: output.signalingAuthJwt.config.issuer,
+        subject: output.signalingAuthJwt.config.subject,
+        audience: output.signalingAuthJwt.config.audience,
+      }
+    )
+    md.add(
+      'authorization',
+      `Bearer ${token}`
+    )
+    return md
+  }
 }

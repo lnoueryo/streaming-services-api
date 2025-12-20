@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common'
+import { Inject, Injectable, Logger } from '@nestjs/common'
 import { ISpaceRepository } from 'src/application/ports/repositories/space.repository'
 import { UseCaseResult } from 'src/application/ports/usecases/usecase-result'
 import { ISignalingGateway } from 'src/application/ports/gateways/signaling.gateway'
@@ -26,11 +26,11 @@ type ErrorType = 'forbidden' | 'not-found' | 'internal'
 @Injectable()
 export class EnableEntryUseCase {
   constructor(
-    @Inject(forwardRef(() => ISpaceRepository))
+    @Inject(ISpaceRepository)
     private readonly spaceRepository: ISpaceRepository,
-    @Inject(forwardRef(() => ISpaceMemberRepository))
+    @Inject(ISpaceMemberRepository)
     private readonly spaceMemberRepository: ISpaceMemberRepository,
-    @Inject(forwardRef(() => ISignalingGateway))
+    @Inject(ISignalingGateway)
     private readonly signalingGateway: ISignalingGateway
   ) {}
 
@@ -51,7 +51,7 @@ export class EnableEntryUseCase {
       }
       try {
         if (params.body.force) {
-          await this.signalingGateway.deleteRtcClient(params)
+          await this.signalingGateway.removeParticipant(params)
           //TODO: 削除対象がない場合、2度APIを叩いている可能性がある。同時に呼び出されたら両方入室してしまうため、ここではエラーを返すべき
         }
         spaceMember.enterRoom()

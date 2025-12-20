@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common'
+import { Inject, Injectable, Logger } from '@nestjs/common'
 import { ISpaceRepository } from 'src/application/ports/repositories/space.repository'
 import { UseCaseResult } from 'src/application/ports/usecases/usecase-result'
 import { auth } from 'src/infrastructure/plugins/firebase-admin'
@@ -17,8 +17,9 @@ type Member = {
 @Injectable()
 export class CreateSpaceUseCase {
   constructor(
-    @Inject(forwardRef(() => ISpaceRepository))
+    @Inject(ISpaceRepository)
     private readonly spaceRepository: ISpaceRepository,
+    @Inject(InviteSpaceService)
     private readonly inviteSpaceService: InviteSpaceService
   ) {}
   async do(params: {

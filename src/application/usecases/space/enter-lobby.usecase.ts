@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common'
+import { Inject, Injectable, Logger } from '@nestjs/common'
 import { ISpaceRepository } from 'src/application/ports/repositories/space.repository'
 import { UseCaseResult } from 'src/application/ports/usecases/usecase-result'
 import { ISignalingGateway } from 'src/application/ports/gateways/signaling.gateway'
@@ -13,9 +13,9 @@ type ErrorType = 'forbidden' | 'not-found' | 'internal'
 @Injectable()
 export class EnterLobbyUseCase {
   constructor(
-    @Inject(forwardRef(() => ISpaceRepository))
+    @Inject(ISpaceRepository)
     private readonly spaceRepository: ISpaceRepository,
-    @Inject(forwardRef(() => ISignalingGateway))
+    @Inject(ISignalingGateway)
     private readonly signalingGateway: ISignalingGateway
   ) {}
 

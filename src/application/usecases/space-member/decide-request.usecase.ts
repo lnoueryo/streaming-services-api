@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common'
+import { Inject, Injectable, Logger } from '@nestjs/common'
 import { SpaceMember } from '@prisma/client'
 import { ISpaceMemberRepository } from 'src/application/ports/repositories/space-member.repository'
 import { UseCaseResult } from 'src/application/ports/usecases/usecase-result'
@@ -10,8 +10,9 @@ type ErrorType = 'forbidden' | 'not-found' | 'internal'
 @Injectable()
 export class DecideRequestUseCase {
   constructor(
-    @Inject(forwardRef(() => ISpaceMemberRepository))
+    @Inject(ISpaceMemberRepository)
     private readonly spaceMemberRepository: ISpaceMemberRepository,
+    @Inject(EntryRequestDecisionService)
     private readonly entryRequestDecisionService: EntryRequestDecisionService
   ) {}
   async do(input: {

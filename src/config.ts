@@ -1,6 +1,7 @@
 import { join } from "path"
 
 type Config = {
+  appSecret: string
   turnServerSecret: string
   ttl: number
   signalingAuthJwt: {
@@ -14,13 +15,19 @@ type Config = {
   }
 }
 
+if (!process.env.APP_SECRET) {
+  throw new Error('invalid app secret')
+}
+
 if (!process.env.TURN_SERVER_SECRET) {
   throw new Error('invalid turn server secret')
 }
-if (!process.env.SERVICE_JWT_SECRET) {
-  throw new Error('invalid service jwt secret')
+
+if (!process.env.SIGNALING_SERVER_SECRET) {
+  throw new Error('invalid signaling server secret')
 }
 const config: Config = {
+  appSecret: process.env.APP_SECRET,
   turnServerSecret: process.env.TURN_SERVER_SECRET,
   ttl: Number(process.env.TURN_SERVER_TTL || 750), // 12.5 minutes
   signalingAuthJwt: {
@@ -30,7 +37,7 @@ const config: Config = {
       subject: 'app-server',
       expiresIn: 60,  // 60 seconds
     },
-    secret: process.env.SERVICE_JWT_SECRET,
+    secret: process.env.SIGNALING_SERVER_SECRET,
   }
 }
 
@@ -45,8 +52,8 @@ type STAGE = 'development' | 'production'
 const configEnvs: { [K in STAGE]: ConfigEnv } = {
   development: {
     allowOrigin: 'https://streaming.localtest.me',
-    signalingApiOrigin: 'http://streaming-signaling:8080',
-    // signalingApiOrigin: 'streaming-signaling:50051',
+    // signalingApiOrigin: 'http://streaming-signaling:8080',
+    signalingApiOrigin: 'streaming-signaling:50051',
     protoPath: join(process.cwd(), 'proto/signaling.proto')
   },
   production: {

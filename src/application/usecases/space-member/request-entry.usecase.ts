@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common'
+import { Inject, Injectable, Logger } from '@nestjs/common'
 import { UseCaseResult } from 'src/application/ports/usecases/usecase-result'
 import { ISpaceMemberRepository } from 'src/application/ports/repositories/space-member.repository'
 import { DomainError } from 'src/domain/errors/domain-error'
@@ -8,7 +8,7 @@ type ErrorType = 'forbidden' | 'internal'
 @Injectable()
 export class RequestEntryUseCase {
   constructor(
-    @Inject(forwardRef(() => ISpaceMemberRepository))
+    @Inject(ISpaceMemberRepository)
     private readonly spaceMemberRepository: ISpaceMemberRepository
   ) {}
   async do(input: {
