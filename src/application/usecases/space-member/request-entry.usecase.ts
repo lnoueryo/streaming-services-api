@@ -3,7 +3,10 @@ import { UseCaseResult } from 'src/application/ports/usecases/usecase-result'
 import { ISpaceMemberRepository } from 'src/application/ports/repositories/space-member.repository'
 import { DomainError } from 'src/domain/errors/domain-error'
 import { ISignalingGateway } from 'src/application/ports/gateways/signaling.gateway'
-import { MemberRole, MemberStatus } from 'src/domain/entities/space-member.entity'
+import {
+  MemberRole,
+  MemberStatus
+} from 'src/domain/entities/space-member.entity'
 
 type ErrorType = 'forbidden' | 'conflict' | 'internal'
 
@@ -18,10 +21,15 @@ export class RequestEntryUseCase {
   async do(input: {
     spaceId: string
     user: { id: string; email: string }
-  }): Promise<UseCaseResult<{
-    role: MemberRole
-    status: MemberStatus
-  }, ErrorType>> {
+  }): Promise<
+    UseCaseResult<
+      {
+        role: MemberRole
+        status: MemberStatus
+      },
+      ErrorType
+    >
+  > {
     try {
       const spaceMember = await this.spaceMemberRepository.findByEmail({
         spaceId: input.spaceId,
@@ -38,7 +46,7 @@ export class RequestEntryUseCase {
             return {
               success: {
                 role: spaceMember.role,
-                status: spaceMember.status,
+                status: spaceMember.status
               }
             }
           }
@@ -62,7 +70,7 @@ export class RequestEntryUseCase {
       return {
         success: {
           role: updatedSpaceMember.role,
-          status: updatedSpaceMember.status,
+          status: updatedSpaceMember.status
         }
       }
     } catch (error) {
