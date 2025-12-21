@@ -3,8 +3,9 @@ import { UseCaseResult } from 'src/application/ports/usecases/usecase-result'
 import { ISpaceMemberRepository } from 'src/application/ports/repositories/space-member.repository'
 import { DomainError } from 'src/domain/errors/domain-error'
 import { ISignalingGateway } from 'src/application/ports/gateways/signaling.gateway'
+import { MemberRole, MemberStatus } from 'src/domain/entities/space-member.entity'
 
-type ErrorType = 'forbidden' | 'internal'
+type ErrorType = 'forbidden' | 'conflict' | 'internal'
 
 @Injectable()
 export class RequestEntryUseCase {
@@ -17,7 +18,10 @@ export class RequestEntryUseCase {
   async do(input: {
     spaceId: string
     user: { id: string; email: string }
-  }): Promise<UseCaseResult<true, ErrorType>> {
+  }): Promise<UseCaseResult<{
+    role: MemberRole
+    status: MemberStatus
+  }, ErrorType>> {
     try {
       const spaceMember = await this.spaceMemberRepository.findByEmail({
         spaceId: input.spaceId,
@@ -26,8 +30,21 @@ export class RequestEntryUseCase {
       if (!spaceMember) {
         return this.error('forbidden', 'スペースのメンバーではありません。')
       }
-      // TODO: approvedでリクエストの可能性があるので、こちらで返すステータスをフロントに反映させるべき。approvedをpendingで上書きする可能性あり
-      spaceMember.requestEntry()
+      try {
+        spaceMember.requestEntry()
+      } catch (error) {
+        if (error instanceof DomainError) {
+          if (error.code === 'invalid-status') {
+            return {
+              success: {
+                role: spaceMember.role,
+                status: spaceMember.status,
+              }
+            }
+          }
+          throw error
+        }
+      }
       const updatedSpaceMember =
         await this.spaceMemberRepository.update(spaceMember)
 
@@ -43,7 +60,10 @@ export class RequestEntryUseCase {
         }
       })
       return {
-        success: true
+        success: {
+          role: updatedSpaceMember.role,
+          status: updatedSpaceMember.status,
+        }
       }
     } catch (error) {
       if (error instanceof DomainError) {

@@ -60,7 +60,6 @@ export class DecideRequestUseCase {
         decision: input.body.status
       })
       const updatedMember = await this.spaceMemberRepository.update(spaceMember)
-      // TODO: gRPCでsignalingサーバーに参加リクエストを送信する
       await this.signalingGateway.decideRequest({
         id: updatedMember.id!,
         spaceId: updatedMember.spaceId,

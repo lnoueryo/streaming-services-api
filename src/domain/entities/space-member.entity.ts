@@ -59,6 +59,13 @@ export class SpaceMember extends BaseEntity {
         code: 'member-rejected'
       })
     }
+    if (this._status !== 'none') {
+      throw new DomainError({
+        type: 'conflict',
+        message: 'space member status has already changed',
+        code: 'invalid-status'
+      })
+    }
     this._status = 'pending'
   }
   applyEntryDecision(decision: 'approved' | 'rejected') {

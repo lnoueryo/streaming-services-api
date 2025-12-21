@@ -14,6 +14,7 @@ import {
 } from 'src/proto/application'
 import { GetSpaceMemberUseCase } from 'src/application/usecases/space-member/get-space-member.usecase'
 import { getGrpcStatus } from '../shared/grpc-status-mapper'
+import { RequestEntryResponse } from './response/request-entry.response'
 
 @ApiTags('space-members')
 @Controller({
@@ -26,16 +27,16 @@ export class SpaceMemberController {
     private readonly getSpaceMemberUseCase: GetSpaceMemberUseCase
   ) {}
   @Patch('/:spaceId/request')
-  @ApiResponse({ status: 200, type: Boolean })
+  @ApiResponse({ status: 200, type: RequestEntryResponse })
   async requestEntry(
     @Param('spaceId') spaceId: string,
     @AuthUser() user: AuthUserRequest
-  ): Promise<true> {
+  ): Promise<RequestEntryResponse> {
     const result = await this.requestEntryUseCase.do({ spaceId, user })
     if ('error' in result) {
       throw new HttpErrorCodeException(result.error)
     }
-    return true
+    return new RequestEntryResponse(result.success)
   }
   @Patch('/:spaceId/request/:spaceMemberId/decide')
   @ApiResponse({ status: 200, type: DecideRequestResponse })
