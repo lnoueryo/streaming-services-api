@@ -10,6 +10,7 @@ import { ISignalingGateway } from 'src/application/ports/gateways/signaling.gate
 import { SignalingGateway } from 'src/infrastructure/gateways/grpc/signaling.gateway'
 import { GrpcClientFactory } from 'src/infrastructure/plugins/micro-services'
 import { JwtFactory } from 'src/infrastructure/plugins/jwt'
+import { GetTargetSpaceMemberUseCase } from 'src/application/usecases/space-member/get-target-space-member.usecase'
 import { GetSpaceMemberUseCase } from 'src/application/usecases/space-member/get-space-member.usecase'
 
 @Module({
@@ -18,6 +19,7 @@ import { GetSpaceMemberUseCase } from 'src/application/usecases/space-member/get
     RequestEntryUseCase,
     DecideRequestUseCase,
     GetSpaceMemberUseCase,
+    GetTargetSpaceMemberUseCase,
     EntryRequestDecisionService,
     GrpcClientFactory,
     JwtFactory,

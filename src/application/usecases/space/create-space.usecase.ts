@@ -4,9 +4,7 @@ import { UseCaseResult } from 'src/application/ports/usecases/usecase-result'
 import { auth } from 'src/infrastructure/plugins/firebase-admin'
 import { InviteSpaceService } from 'src/domain/services/space/invite-space.service'
 import { Space, SpacePrivacy } from 'src/domain/entities/space.entity'
-import {
-  MemberRole
-} from 'src/domain/entities/space-member.entity'
+import { MemberRole } from 'src/domain/entities/space-member.entity'
 
 type Member = {
   email: string

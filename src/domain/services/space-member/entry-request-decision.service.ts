@@ -11,7 +11,7 @@ export class EntryRequestDecisionService {
   }: {
     actor: SpaceMember
     target: SpaceMember
-    decision: 'approved' | 'rejected'
+    decision: 'none' | 'approved' | 'rejected'
   }) {
     if (!actor.isOwner()) {
       throw new DomainError({

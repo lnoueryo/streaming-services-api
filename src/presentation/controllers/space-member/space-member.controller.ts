@@ -1,4 +1,11 @@
-import { Body, Controller, Param, ParseIntPipe, Patch } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch
+} from '@nestjs/common'
 import { ApiTags, ApiResponse } from '@nestjs/swagger'
 import { AuthUser } from '../../interceptors/auth-user.decorator'
 import { AuthUserRequest } from '../shared/auth.request'
@@ -9,12 +16,14 @@ import { DecideRequestUseCase } from 'src/application/usecases/space-member/deci
 import { DecideRequestResponse } from './response/decide-request.response'
 import { GrpcMethod, RpcException } from '@nestjs/microservices'
 import {
-  GetSpaceMemberRequest,
-  GetSpaceMemberResponse
+  GetTargetSpaceMemberRequest,
+  GetTargetSpaceMemberResponse
 } from 'src/proto/application'
-import { GetSpaceMemberUseCase } from 'src/application/usecases/space-member/get-space-member.usecase'
+import { GetTargetSpaceMemberUseCase } from 'src/application/usecases/space-member/get-target-space-member.usecase'
 import { getGrpcStatus } from '../shared/grpc-status-mapper'
 import { RequestEntryResponse } from './response/request-entry.response'
+import { GetSpaceMemberResponse } from './response/get-space-members.response'
+import { GetSpaceMemberUseCase } from 'src/application/usecases/space-member/get-space-member.usecase'
 
 @ApiTags('space-members')
 @Controller({
@@ -22,10 +31,26 @@ import { RequestEntryResponse } from './response/request-entry.response'
 })
 export class SpaceMemberController {
   constructor(
+    private readonly getSpaceMemberUseCase: GetSpaceMemberUseCase,
     private readonly requestEntryUseCase: RequestEntryUseCase,
     private readonly decideRequestUseCase: DecideRequestUseCase,
-    private readonly getSpaceMemberUseCase: GetSpaceMemberUseCase
+    private readonly getTargetSpaceMemberUseCase: GetTargetSpaceMemberUseCase
   ) {}
+  @Get('/:spaceId')
+  @ApiResponse({ status: 200, type: GetSpaceMemberResponse })
+  async getSpaceMembers(
+    @Param('spaceId') spaceId: string,
+    @AuthUser() user: AuthUserRequest
+  ): Promise<GetSpaceMemberResponse> {
+    const result = await this.getSpaceMemberUseCase.do({
+      spaceId,
+      userId: user.id
+    })
+    if ('error' in result) {
+      throw new HttpErrorCodeException(result.error)
+    }
+    return new GetSpaceMemberResponse(result.success)
+  }
   @Patch('/:spaceId/request')
   @ApiResponse({ status: 200, type: RequestEntryResponse })
   async requestEntry(
@@ -57,11 +82,11 @@ export class SpaceMemberController {
     return new DecideRequestResponse(result.success)
   }
 
-  @GrpcMethod('SpaceService', 'GetSpaceMember')
+  @GrpcMethod('SpaceService', 'GetTargetSpaceMember')
   async getSpaceMember(
-    data: GetSpaceMemberRequest
-  ): Promise<GetSpaceMemberResponse> {
-    const result = await this.getSpaceMemberUseCase.do({
+    data: GetTargetSpaceMemberRequest
+  ): Promise<GetTargetSpaceMemberResponse> {
+    const result = await this.getTargetSpaceMemberUseCase.do({
       spaceId: data.spaceId,
       userId: data.userId
     })

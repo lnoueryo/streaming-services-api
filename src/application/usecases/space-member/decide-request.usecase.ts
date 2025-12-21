@@ -20,7 +20,7 @@ export class DecideRequestUseCase {
   async do(input: {
     params: { spaceId: string; spaceMemberId: number }
     user: { id: string; email: string }
-    body: { status: 'approved' | 'rejected' }
+    body: { status: 'none' | 'approved' | 'rejected' }
   }): Promise<
     UseCaseResult<
       {

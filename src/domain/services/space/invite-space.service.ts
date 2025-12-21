@@ -8,11 +8,12 @@ type InvitePayload = {
 
 @Injectable()
 export class InviteSpaceService {
-
   generate(space: Space): string {
-    return Buffer.from(JSON.stringify({
-      id: space.id
-    })).toString('base64url')
+    return Buffer.from(
+      JSON.stringify({
+        id: space.id
+      })
+    ).toString('base64url')
   }
 
   decode(hash: string): InvitePayload {
