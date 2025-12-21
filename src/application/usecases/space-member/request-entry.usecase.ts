@@ -60,7 +60,7 @@ export class RequestEntryUseCase {
         spaceId: input.spaceId,
         spaceMember: {
           id: updatedSpaceMember.id!,
-          spaceId: updatedSpaceMember.spaceId!,
+          spaceId: updatedSpaceMember.spaceId,
           userId: updatedSpaceMember.userId!,
           email: updatedSpaceMember.email!,
           role: updatedSpaceMember.role,

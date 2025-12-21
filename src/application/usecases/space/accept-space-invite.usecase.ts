@@ -10,7 +10,7 @@ type AcceptSpaceInviteUseCaseResult = {
   redirect: string
   space: {
     id: string
-    name?: string | null
+    name?: string
     privacy: string
   }
 }
@@ -79,7 +79,7 @@ export class AcceptSpaceInviteUseCase {
       success: {
         space: {
           id: space.id,
-          name: space.name,
+          name: space.name || undefined,
           privacy: space.privacy
         },
         redirect: `/space/${space.id}`

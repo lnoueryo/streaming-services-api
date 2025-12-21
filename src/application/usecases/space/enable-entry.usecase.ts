@@ -109,7 +109,7 @@ export class EnableEntryUseCase {
     return {
       success: new GetRoomDto({
         id: space.id,
-        name: space.name,
+        name: space.name || undefined,
         privacy: space.privacy,
         membership: {
           role: spaceMember?.role || 'member',
