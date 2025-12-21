@@ -64,7 +64,7 @@ const configEnvs: { [K in STAGE]: ConfigEnv } = {
   },
   production: {
     allowOrigin: 'https://streaming.jounetsism.biz',
-    signalingApiOrigin: 'https://streaming-signaling.jounetsism.biz',
+    signalingApiOrigin: 'streaming-signaling:50051',
     protoPath: {
       signaling: join(process.cwd(), 'src/proto/signaling.proto'),
       application: join(process.cwd(), 'src/proto/application.proto')
