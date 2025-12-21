@@ -5,8 +5,7 @@ import { auth } from 'src/infrastructure/plugins/firebase-admin'
 import { InviteSpaceService } from 'src/domain/services/space/invite-space.service'
 import { Space, SpacePrivacy } from 'src/domain/entities/space.entity'
 import {
-  MemberRole,
-  SpaceMember
+  MemberRole
 } from 'src/domain/entities/space-member.entity'
 
 type Member = {
@@ -99,7 +98,7 @@ export class CreateSpaceUseCase {
       }
 
       const createdSpace = await this.spaceRepository.create(space)
-      const url = this.inviteSpaceService.generate(createdSpace)
+      const token = this.inviteSpaceService.generate(createdSpace)
       return {
         success: {
           space: {
@@ -107,7 +106,7 @@ export class CreateSpaceUseCase {
             name: createdSpace.name,
             privacy: createdSpace.privacy
           },
-          url
+          url: `/space/invite/${token}`
         }
       }
     } catch (error) {
