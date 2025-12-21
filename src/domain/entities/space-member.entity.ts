@@ -68,7 +68,7 @@ export class SpaceMember extends BaseEntity {
     }
     this._status = 'pending'
   }
-  applyEntryDecision(decision: 'approved' | 'rejected') {
+  applyEntryDecision(decision: 'none' | 'approved' | 'rejected') {
     this._status = decision
   }
   get userId() {

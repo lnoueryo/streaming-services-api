@@ -82,7 +82,7 @@ export class AcceptSpaceInviteUseCase {
           name: space.name,
           privacy: space.privacy
         },
-        redirect: `/spaces/${space.id}`
+        redirect: `/space/${space.id}`
       }
     }
   }
