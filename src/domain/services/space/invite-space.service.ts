@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
+import { config } from 'src/config'
 import { Space } from 'src/domain/entities/space.entity'
 import { DomainError } from 'src/domain/errors/domain-error'
+import { JwtFactory } from 'src/infrastructure/plugins/jwt'
 
 type InvitePayload = {
   id: string
@@ -10,17 +12,20 @@ type InvitePayload = {
 
 @Injectable()
 export class InviteSpaceService {
-  constructor(private readonly jwtService: JwtService) {}
+  private readonly jwt: JwtService
+  constructor(private readonly jwtFactory: JwtFactory) {
+    this.jwt = this.jwtFactory.create(config.appSecret, { expiresIn: 14400 })
+  }
 
   generate(space: Space): string {
-    return this.jwtService.sign({
+    return this.jwt.sign({
       id: space.id
     })
   }
 
-  decode(hash: string): InvitePayload | undefined {
+  decode(hash: string): InvitePayload {
     try {
-      return this.jwtService.verify<InvitePayload>(hash)
+      return this.jwt.verify<InvitePayload>(hash)
     } catch (error) {
       throw new DomainError({
         type: 'validation',

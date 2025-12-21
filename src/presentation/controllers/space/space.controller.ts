@@ -5,7 +5,6 @@ import {
   Param,
   Patch,
   Post,
-  Put,
   Query
 } from '@nestjs/common'
 import { ApiTags, ApiResponse } from '@nestjs/swagger'

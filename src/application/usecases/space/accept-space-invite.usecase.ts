@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common'
+import { Inject, Injectable, Logger } from '@nestjs/common'
 import { ISpaceRepository } from 'src/application/ports/repositories/space.repository'
 import { UseCaseResult } from 'src/application/ports/usecases/usecase-result'
 import { InviteSpaceService } from 'src/domain/services/space/invite-space.service'
@@ -10,7 +10,7 @@ type AcceptSpaceInviteUseCaseResult = {
   redirect: string
   space: {
     id: string
-    name?: string
+    name?: string | null
     privacy: string
   }
 }
@@ -19,11 +19,11 @@ type ErrorType = 'validation' | 'not-found' | 'forbidden' | 'internal'
 @Injectable()
 export class AcceptSpaceInviteUseCase {
   constructor(
-    @Inject(forwardRef(() => ISpaceRepository))
+    @Inject(ISpaceRepository)
     private readonly spaceRepository: ISpaceRepository,
-    @Inject(forwardRef(() => ISpaceMemberRepository))
+    @Inject(ISpaceMemberRepository)
     private readonly spaceMemberRepository: ISpaceMemberRepository,
-    @Inject('InviteSpaceService')
+    @Inject(InviteSpaceService)
     private readonly inviteSpaceService: InviteSpaceService
   ) {}
 
@@ -60,6 +60,7 @@ export class AcceptSpaceInviteUseCase {
         }
         return this.success(space)
       }
+      return this.error('internal', 'サーバーエラーが発生しました')
     } catch (error) {
       if (error instanceof DomainError) {
         if (error.type === 'validation') {

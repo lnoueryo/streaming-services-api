@@ -1,7 +1,7 @@
-import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common'
+import { Inject, Injectable, Logger } from '@nestjs/common'
 import { ISpaceRepository } from 'src/application/ports/repositories/space.repository'
 import { UseCaseResult } from 'src/application/ports/usecases/usecase-result'
-import { ISignalingGateway } from 'src/application/ports/gateways/signaling.gatway'
+import { ISignalingGateway } from 'src/application/ports/gateways/signaling.gateway'
 import { GetRoomDto } from './dto/get-room.dto'
 import { DomainError } from 'src/domain/errors/domain-error'
 import { Space, SpacePrivacy } from 'src/domain/entities/space.entity'
@@ -14,7 +14,7 @@ type EnableEntryUseCaseResult = {
   id: string
   privacy: SpacePrivacy
   membership: {
-    role: SpaceMember['role'],
+    role: SpaceMember['role']
     status: SpaceMember['status']
   }
   participants: Participant[]
@@ -26,11 +26,11 @@ type ErrorType = 'forbidden' | 'not-found' | 'internal'
 @Injectable()
 export class EnableEntryUseCase {
   constructor(
-    @Inject(forwardRef(() => ISpaceRepository))
+    @Inject(ISpaceRepository)
     private readonly spaceRepository: ISpaceRepository,
-    @Inject(forwardRef(() => ISpaceMemberRepository))
+    @Inject(ISpaceMemberRepository)
     private readonly spaceMemberRepository: ISpaceMemberRepository,
-    @Inject(forwardRef(() => ISignalingGateway))
+    @Inject(ISignalingGateway)
     private readonly signalingGateway: ISignalingGateway
   ) {}
 
@@ -46,9 +46,12 @@ export class EnableEntryUseCase {
       }
 
       const spaceMember = space.ensureMemberCanEnterRoom(params.user.email)
+      if (!spaceMember) {
+        return this.success({ space, user: params.user })
+      }
       try {
         if (params.body.force) {
-          await this.signalingGateway.deleteRtcClient(params)
+          await this.signalingGateway.removeParticipant(params)
           //TODO: 削除対象がない場合、2度APIを叩いている可能性がある。同時に呼び出されたら両方入室してしまうため、ここではエラーを返すべき
         }
         spaceMember.enterRoom()
@@ -99,7 +102,7 @@ export class EnableEntryUseCase {
     user
   }: {
     space: Space
-    spaceMember: SpaceMember
+    spaceMember?: SpaceMember
     room?: Room
     user: { id: string }
   }) {
@@ -109,8 +112,8 @@ export class EnableEntryUseCase {
         name: space.name,
         privacy: space.privacy,
         membership: {
-          role: spaceMember.role,
-          status: spaceMember.status
+          role: spaceMember?.role || 'member',
+          status: spaceMember?.status || 'approved'
         },
         participants: room?.participants || [],
         isParticipated: room?.isUserParticipated(user.id) || false

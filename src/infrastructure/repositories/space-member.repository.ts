@@ -1,16 +1,59 @@
 import { Inject, Injectable } from '@nestjs/common'
-import {
-  CreateSpaceMemberParam,
-  ISpaceMemberRepository,
-  UpdateSpaceMemberParam
-} from 'src/application/ports/repositories/space-member.repository'
+import { ISpaceMemberRepository } from 'src/application/ports/repositories/space-member.repository'
 import { SpaceMember } from 'src/domain/entities/space-member.entity'
-import { IPrismaClient } from 'src/infrastructure/plugins/prisma'
+import { IPrismaClient, PrismaFactory } from 'src/infrastructure/plugins/prisma'
 
 @Injectable()
 export class SpaceMemberRepository implements ISpaceMemberRepository {
-  constructor(@Inject('PRISMA') private readonly prisma: IPrismaClient) {}
-  async create(params: CreateSpaceMemberParam): Promise<SpaceMember> {
+  private readonly prisma: IPrismaClient
+  constructor(private readonly factory: PrismaFactory) {
+    this.prisma = this.factory.create()
+  }
+  async find(id: number): Promise<SpaceMember | null> {
+    const spaceMember = await this.prisma.spaceMember.findUnique({
+      where: {
+        id
+      }
+    })
+    return spaceMember ? new SpaceMember(spaceMember) : null
+  }
+  async findMany(criteria: { spaceId?: string }): Promise<SpaceMember[]> {
+    const spaceMembers = await this.prisma.spaceMember.findMany({
+      where: {
+        spaceId: criteria.spaceId
+      }
+    })
+    return spaceMembers.map((spaceMember) => new SpaceMember(spaceMember))
+  }
+  async findByEmail(params: {
+    spaceId: string
+    email: string
+  }): Promise<SpaceMember | null> {
+    const spaceMember = await this.prisma.spaceMember.findUnique({
+      where: {
+        spaceId_email: {
+          spaceId: params.spaceId,
+          email: params.email
+        }
+      }
+    })
+    return spaceMember ? new SpaceMember(spaceMember) : null
+  }
+  async findByUserId(params: {
+    spaceId: string
+    userId: string
+  }): Promise<SpaceMember | null> {
+    const spaceMember = await this.prisma.spaceMember.findUnique({
+      where: {
+        spaceId_userId: {
+          spaceId: params.spaceId,
+          userId: params.userId
+        }
+      }
+    })
+    return spaceMember ? new SpaceMember(spaceMember) : null
+  }
+  async create(params: SpaceMember): Promise<SpaceMember> {
     const spaceMember = await this.prisma.spaceMember.create({
       data: {
         spaceId: params.spaceId,

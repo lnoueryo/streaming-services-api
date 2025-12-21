@@ -1,7 +1,7 @@
-import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common'
+import { Inject, Injectable, Logger } from '@nestjs/common'
 import { ISpaceRepository } from 'src/application/ports/repositories/space.repository'
 import { UseCaseResult } from 'src/application/ports/usecases/usecase-result'
-import { ISignalingGateway } from 'src/application/ports/gateways/signaling.gatway'
+import { ISignalingGateway } from 'src/application/ports/gateways/signaling.gateway'
 import { GetRoomDto } from './dto/get-room.dto'
 import { DomainError } from 'src/domain/errors/domain-error'
 import { Space } from 'src/domain/entities/space.entity'
@@ -13,9 +13,9 @@ type ErrorType = 'forbidden' | 'not-found' | 'internal'
 @Injectable()
 export class EnterLobbyUseCase {
   constructor(
-    @Inject(forwardRef(() => ISpaceRepository))
+    @Inject(ISpaceRepository)
     private readonly spaceRepository: ISpaceRepository,
-    @Inject(forwardRef(() => ISignalingGateway))
+    @Inject(ISignalingGateway)
     private readonly signalingGateway: ISignalingGateway
   ) {}
 
@@ -66,7 +66,7 @@ export class EnterLobbyUseCase {
     user
   }: {
     space: Space
-    spaceMember: SpaceMember
+    spaceMember?: SpaceMember
     room?: Room
     user: { id: string }
   }) {
@@ -76,8 +76,9 @@ export class EnterLobbyUseCase {
         name: space.name,
         privacy: space.privacy,
         membership: {
-          role: spaceMember.role,
-          status: spaceMember.status
+          // TODO: publicでも一応SpaceMemberは必要かも？
+          role: spaceMember?.role || 'member',
+          status: spaceMember?.status || 'approved'
         },
         participants: room?.participants || [],
         isParticipated: room?.isUserParticipated(user.id) || false

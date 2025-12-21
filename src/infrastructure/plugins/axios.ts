@@ -1,3 +1,4 @@
+import { Injectable } from '@nestjs/common'
 import axios, { AxiosRequestConfig, AxiosInstance } from 'axios'
 import { CommonErrorCode, DomainError } from 'src/domain/errors/domain-error'
 
@@ -11,28 +12,31 @@ export const httpStatusToCommonErrorCodeMap = {
   500: 'internal'
 } as const
 
-export function toCommonErrorCode(status: number): CommonErrorCode {
+export function toCommonErrorCode(
+  status: keyof typeof httpStatusToCommonErrorCodeMap
+): CommonErrorCode {
   return httpStatusToCommonErrorCodeMap[status] ?? 'internal'
 }
 
+@Injectable()
 export class AxiosFactory {
-  static create(config: AxiosRequestConfig): AxiosInstance {
+  create(config: AxiosRequestConfig): AxiosInstance {
     const instance = axios.create(config)
     instance.interceptors.response.use(
       (res) => {
-        if (res.status >= 400) {
-          const status = res?.status ?? 0
-          const message = res?.data?.message ?? ''
-          const code = res?.data?.code ?? ''
+        return res
+      },
+      (error) => {
+        if (error.response.status >= 400) {
+          const status = error.response?.status ?? 0
+          const message = error.response?.data?.message ?? ''
+          const code = error.response?.data?.code ?? ''
           throw new DomainError({
             type: toCommonErrorCode(status),
             message,
             code
           })
         }
-        return res
-      },
-      (error) => {
         throw error
       }
     )

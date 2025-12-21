@@ -4,24 +4,20 @@ import { GetPublicSpaceUseCase } from 'src/application/usecases/space/get-public
 import { CreateSpaceUseCase } from 'src/application/usecases/space/create-space.usecase'
 import { SpaceController } from 'src/presentation/controllers/space/space.controller'
 import { SpaceRepository } from 'src/infrastructure/repositories/space.repository'
-import { prisma } from '../../../infrastructure/plugins/prisma'
+import { PrismaFactory } from '../../../infrastructure/plugins/prisma'
 import { EnterLobbyUseCase } from 'src/application/usecases/space/enter-lobby.usecase'
-import { ISignalingGateway } from 'src/application/ports/gateways/signaling.gatway'
-import { SignalingGateway } from 'src/infrastructure/gateways/signaling.gateway'
-import { SignalingHttpClient } from 'src/infrastructure/http/signaling-client'
+import { ISignalingGateway } from 'src/application/ports/gateways/signaling.gateway'
+import { SignalingGateway } from 'src/infrastructure/gateways/grpc/signaling.gateway'
 import { EnableEntryUseCase } from 'src/application/usecases/space/enable-entry.usecase'
 import { AcceptSpaceInviteUseCase } from 'src/application/usecases/space/accept-space-invite.usecase'
 import { InviteSpaceService } from 'src/domain/services/space/invite-space.service'
 import { ISpaceMemberRepository } from 'src/application/ports/repositories/space-member.repository'
 import { SpaceMemberRepository } from 'src/infrastructure/repositories/space-member.repository'
-import { JwtModule } from '@nestjs/jwt'
+import { AxiosFactory } from 'src/infrastructure/plugins/axios'
+import { JwtFactory } from 'src/infrastructure/plugins/jwt'
+import { GrpcClientFactory } from 'src/infrastructure/plugins/micro-services'
 
-const jwtConfig = {
-  secret: process.env.JWT_SECRET || 'default_secret',
-  signOptions: { expiresIn: 14400 }
-}
 @Module({
-  imports: [JwtModule.register(jwtConfig)],
   controllers: [SpaceController],
   providers: [
     CreateSpaceUseCase,
@@ -29,7 +25,10 @@ const jwtConfig = {
     GetPublicSpaceUseCase,
     EnterLobbyUseCase,
     EnableEntryUseCase,
-    SignalingHttpClient,
+    AxiosFactory,
+    PrismaFactory,
+    JwtFactory,
+    GrpcClientFactory,
     InviteSpaceService,
     {
       provide: ISpaceRepository,
@@ -42,14 +41,6 @@ const jwtConfig = {
     {
       provide: ISignalingGateway,
       useClass: SignalingGateway
-    },
-    {
-      provide: 'InviteSpaceService',
-      useClass: InviteSpaceService
-    },
-    {
-      provide: 'PRISMA',
-      useValue: prisma
     }
   ],
   exports: [ISpaceRepository, ISignalingGateway]

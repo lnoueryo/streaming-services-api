@@ -48,5 +48,6 @@ model SpaceMember {
   updatedAt   DateTime        @updatedAt @map("updated_at")
   space       Space           @relation(fields: [spaceId], references: [id])
   @@unique([spaceId, email])
+  @@unique([spaceId, userId])
   @@map("space_members")
 }

@@ -5,7 +5,8 @@ import { AppModule } from './app.module'
 import { ValidationPipe } from '@nestjs/common'
 import { LoggingInterceptor } from './infrastructure/plugins/logger'
 import * as cookieParser from 'cookie-parser'
-import config from './config'
+import { config } from './config'
+import { Transport } from '@nestjs/microservices'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -26,6 +27,15 @@ async function bootstrap() {
   )
   app.useGlobalInterceptors(new LoggingInterceptor())
   app.use(cookieParser())
+  app.connectMicroservice({
+    transport: Transport.GRPC,
+    options: {
+      url: '0.0.0.0:50051',
+      protoPath: config.protoPath.application,
+      package: 'application'
+    }
+  })
+  await app.startAllMicroservices()
   await app.listen(process.env.PORT ?? 4000, '0.0.0.0')
 }
 bootstrap()

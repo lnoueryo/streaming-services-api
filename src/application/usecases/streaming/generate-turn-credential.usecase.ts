@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common'
 import { UseCaseResult } from 'src/application/ports/usecases/usecase-result'
 import { createHmac } from 'crypto'
 import { GenerateTurnCredentialDto } from './dto/generate-turn-credential.dto'
-import config from 'src/config'
+import { config } from 'src/config'
 @Injectable()
 export class GenerateTurnCredentialUseCase {
   constructor() {}
