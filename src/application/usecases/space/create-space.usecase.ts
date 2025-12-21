@@ -32,7 +32,7 @@ export class CreateSpaceUseCase {
         space: {
           id: string
           privacy: SpacePrivacy
-          name?: string | null
+          name?: string
         }
         url: string
       },
@@ -101,7 +101,7 @@ export class CreateSpaceUseCase {
         success: {
           space: {
             id: createdSpace.id,
-            name: createdSpace.name,
+            name: createdSpace.name || undefined,
             privacy: createdSpace.privacy
           },
           url: `/space/invite/${token}`
