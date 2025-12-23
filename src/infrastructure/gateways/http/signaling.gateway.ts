@@ -42,7 +42,7 @@ export class SignalingGateway implements ISignalingGateway {
   async requestEntry(params: {
     spaceId: string
     spaceMember: {
-      id: number
+      id: string
       spaceId: string
       userId: string
       email: string
@@ -54,7 +54,7 @@ export class SignalingGateway implements ISignalingGateway {
   }
 
   async decideRequest(params: {
-    id: number
+    id: string
     spaceId: string
     userId: string
     email: string

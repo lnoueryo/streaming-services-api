@@ -24,7 +24,7 @@ export type IRoomService = {
   requestEntry(params: {
     spaceId: string
     spaceMember: {
-      id: number
+      id: string
       spaceId: string
       userId: string
       email: string
@@ -33,7 +33,7 @@ export type IRoomService = {
     }
   }): Promise<void>
   decideRequest(params: {
-    id: number
+    id: string
     spaceId: string
     userId: string
     email: string

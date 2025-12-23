@@ -14,7 +14,7 @@ export class GetTargetSpaceMemberUseCase {
   async do(input: { spaceId: string; userId: string }): Promise<
     UseCaseResult<
       {
-        id: number
+        id: string
         spaceId: string
         userId: string
         email: string
@@ -34,7 +34,7 @@ export class GetTargetSpaceMemberUseCase {
 
       return {
         success: {
-          id: spaceMember.id!,
+          id: spaceMember.id,
           spaceId: spaceMember.spaceId,
           userId: spaceMember.userId!,
           email: spaceMember.email!,

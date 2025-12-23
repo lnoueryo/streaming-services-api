@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common'
-import { PrismaFactory } from '../../../infrastructure/plugins/prisma'
+import { PrismaService } from '../../../infrastructure/plugins/prisma'
 import { ISpaceMemberRepository } from 'src/application/ports/repositories/space-member.repository'
 import { SpaceMemberRepository } from 'src/infrastructure/repositories/space-member.repository'
 import { SpaceMemberController } from './space-member.controller'
@@ -12,6 +12,7 @@ import { GrpcClientFactory } from 'src/infrastructure/plugins/micro-services'
 import { JwtFactory } from 'src/infrastructure/plugins/jwt'
 import { GetTargetSpaceMemberUseCase } from 'src/application/usecases/space-member/get-target-space-member.usecase'
 import { GetSpaceMemberUseCase } from 'src/application/usecases/space-member/get-space-member.usecase'
+import { InviteSpaceMemberUseCase } from 'src/application/usecases/space-member/invite-space-member.usecase'
 
 @Module({
   controllers: [SpaceMemberController],
@@ -20,10 +21,11 @@ import { GetSpaceMemberUseCase } from 'src/application/usecases/space-member/get
     DecideRequestUseCase,
     GetSpaceMemberUseCase,
     GetTargetSpaceMemberUseCase,
+    InviteSpaceMemberUseCase,
     EntryRequestDecisionService,
     GrpcClientFactory,
     JwtFactory,
-    PrismaFactory,
+    PrismaService,
     {
       provide: ISpaceMemberRepository,
       useClass: SpaceMemberRepository

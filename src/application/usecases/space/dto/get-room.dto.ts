@@ -18,6 +18,7 @@ export class GetRoomDto {
   }
   readonly participants: Participant[]
   readonly isParticipated: boolean
+  readonly invitationToken?: string
   constructor(params: {
     id: string
     name?: string | null
@@ -28,6 +29,7 @@ export class GetRoomDto {
     }
     participants: Participant[]
     isParticipated: boolean
+    invitationToken?: string
   }) {
     this.id = params.id
     this.name = params.name
@@ -35,5 +37,6 @@ export class GetRoomDto {
     this.membership = params.membership
     this.participants = params.participants
     this.isParticipated = params.isParticipated
+    this.invitationToken = params.invitationToken
   }
 }

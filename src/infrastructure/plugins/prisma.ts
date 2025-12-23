@@ -1,7 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { PrismaClient } from '@prisma/client'
-
-export type IPrismaClient = PrismaClient
+import { Prisma, PrismaClient } from '@prisma/client'
 
 @Injectable()
 export class PrismaFactory {
@@ -32,3 +30,12 @@ export class PrismaFactory {
     return this.prisma
   }
 }
+
+@Injectable()
+export class PrismaService extends PrismaClient implements Omit<PrismaClient, "$connect" | "$disconnect" | "$on" | "$transaction" | "$extends"> {}
+
+// export type IPrismaClient = Omit<PrismaClient, "$connect" | "$disconnect" | "$on" | "$transaction" | "$extends">
+
+export type IPrismaClient =
+  | PrismaService
+  | Prisma.TransactionClient

@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import {
   FindSpacesParam,
   SpaceWhere,
@@ -6,14 +6,11 @@ import {
 } from 'src/application/ports/repositories/space.repository'
 import { SpaceMember } from 'src/domain/entities/space-member.entity'
 import { Space } from 'src/domain/entities/space.entity'
-import { IPrismaClient, PrismaFactory } from 'src/infrastructure/plugins/prisma'
+import { PrismaService } from 'src/infrastructure/plugins/prisma'
 
 @Injectable()
 export class SpaceRepository implements ISpaceRepository {
-  private readonly prisma: IPrismaClient
-  constructor(private readonly factory: PrismaFactory) {
-    this.prisma = this.factory.create()
-  }
+  constructor(private readonly prisma: PrismaService) {}
   async findSpaces(params: FindSpacesParam) {
     const spaces = await this.prisma.space.findMany({
       where: { privacy: params.privacy },
@@ -70,5 +67,8 @@ export class SpaceRepository implements ISpaceRepository {
       }
     })
     return new Space(space)
+  }
+  transaction(tx: any) {
+    return new SpaceRepository(tx)
   }
 }

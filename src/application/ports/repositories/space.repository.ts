@@ -1,4 +1,5 @@
 import { Space, SpacePrivacy } from 'src/domain/entities/space.entity'
+import { IRepository } from './repository'
 
 export const ISpaceRepository = Symbol('ISpaceRepository')
 
@@ -10,7 +11,7 @@ export type FindSpacesParam = SpaceWhere & {
   limit: number
 }
 
-export type ISpaceRepository = {
+export interface ISpaceRepository extends IRepository<ISpaceRepository> {
   findSpaces(params: FindSpacesParam): Promise<Space[]>
   findSpace(id: string): Promise<Space | null>
   countSpaces(params: SpaceWhere): Promise<number>

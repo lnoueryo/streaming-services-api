@@ -11,7 +11,7 @@ export type ISignalingGateway = {
   requestEntry: (params: {
     spaceId: string
     spaceMember: {
-      id: number
+      id: string
       spaceId: string
       userId: string
       email: string
@@ -20,7 +20,7 @@ export type ISignalingGateway = {
     }
   }) => Promise<void>
   decideRequest: (params: {
-    id: number
+    id: string
     spaceId: string
     userId: string
     email: string

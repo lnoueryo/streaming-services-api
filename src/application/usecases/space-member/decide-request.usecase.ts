@@ -18,13 +18,13 @@ export class DecideRequestUseCase {
     private readonly signalingGateway: ISignalingGateway
   ) {}
   async do(input: {
-    params: { spaceId: string; spaceMemberId: number }
+    params: { spaceId: string; spaceMemberId: string }
     user: { id: string; email: string }
     body: { status: 'none' | 'approved' | 'rejected' }
   }): Promise<
     UseCaseResult<
       {
-        id: number
+        id: string
         role: SpaceMember['role']
         status: SpaceMember['status']
       },
@@ -61,7 +61,7 @@ export class DecideRequestUseCase {
       })
       const updatedMember = await this.spaceMemberRepository.update(spaceMember)
       await this.signalingGateway.decideRequest({
-        id: updatedMember.id!,
+        id: updatedMember.id,
         spaceId: updatedMember.spaceId,
         userId: updatedMember.userId!,
         email: updatedMember.email,

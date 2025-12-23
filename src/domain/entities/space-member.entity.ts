@@ -1,11 +1,12 @@
 import { BaseEntity } from './base.entity'
 import { DomainError } from '../errors/domain-error'
+import { v7 as uuidv7 } from 'uuid'
 
 export type MemberRole = 'owner' | 'admin' | 'member'
 export type MemberStatus = 'approved' | 'pending' | 'rejected' | 'none'
 
 export class SpaceMember extends BaseEntity {
-  readonly id?: number
+  readonly id: string
   readonly spaceId: string
   private _userId?: string | null
   readonly email: string
@@ -14,7 +15,7 @@ export class SpaceMember extends BaseEntity {
   private _joinedAt?: Date | null
 
   constructor(params: {
-    id?: number
+    id?: string
     spaceId: string
     userId?: string | null
     email: string
@@ -25,7 +26,7 @@ export class SpaceMember extends BaseEntity {
     updatedAt?: Date
   }) {
     super(params)
-    this.id = params.id
+    this.id = params.id || uuidv7()
     this.spaceId = params.spaceId
     this._userId = params.userId
     this.email = params.email

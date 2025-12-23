@@ -37,7 +37,7 @@ enum RequestStatus {
 }
 
 model SpaceMember {
-  id          Int             @id @default(autoincrement())
+  id          String          @id @default(uuid(7))
   spaceId     String          @map("space_id")
   userId      String?         @map("user_id")
   email       String
