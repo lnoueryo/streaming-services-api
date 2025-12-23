@@ -53,6 +53,7 @@ export class SpaceMemberRepository implements ISpaceMemberRepository {
   async create(params: SpaceMember): Promise<SpaceMember> {
     const spaceMember = await this.prisma.spaceMember.create({
       data: {
+        id: params.id,
         spaceId: params.spaceId,
         userId: params.userId,
         email: params.email,
@@ -105,6 +106,7 @@ export class SpaceMemberRepository implements ISpaceMemberRepository {
         joinedAt: params.joinedAt
       },
       create: {
+        id: params.id,
         spaceId: params.spaceId,
         email: params.email,
         userId: params.userId,
