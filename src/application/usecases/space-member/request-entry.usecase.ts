@@ -58,7 +58,14 @@ export class RequestEntryUseCase {
 
       await this.signalingGateway.requestEntry({
         spaceId: input.spaceId,
-        spaceMember: updatedSpaceMember
+        spaceMember: {
+          id: updatedSpaceMember.id!,
+          spaceId: updatedSpaceMember.spaceId!,
+          userId: updatedSpaceMember.userId!,
+          email: updatedSpaceMember.email!,
+          role: updatedSpaceMember.role,
+          status: updatedSpaceMember.status
+        }
       })
       return {
         success: {
