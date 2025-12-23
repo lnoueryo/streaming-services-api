@@ -6,6 +6,7 @@ export class GetRoomResponse {
   membership: GetRoomDto['membership']
   participants: GetRoomDto['participants']
   isParticipated: boolean
+  invitationToken?: string
 
   constructor(params: GetRoomDto) {
     this.id = params.id
@@ -16,5 +17,6 @@ export class GetRoomResponse {
     }
     this.participants = params.participants
     this.isParticipated = params.isParticipated
+    this.invitationToken = params.invitationToken
   }
 }

@@ -4,6 +4,8 @@ import { AxiosInstance } from 'axios'
 import { ISignalingGateway } from 'src/application/ports/gateways/signaling.gateway'
 import { config } from 'src/config'
 import { Room } from 'src/domain/entities/room.entity'
+import { SpaceMember } from 'src/domain/entities/space-member.entity'
+import { Space } from 'src/domain/entities/space.entity'
 import { AxiosFactory } from 'src/infrastructure/plugins/axios'
 import { JwtFactory } from 'src/infrastructure/plugins/jwt'
 
@@ -41,25 +43,18 @@ export class SignalingGateway implements ISignalingGateway {
   }
   async requestEntry(params: {
     spaceId: string
-    spaceMember: {
-      id: number
-      spaceId: string
-      userId: string
-      email: string
-      role: string
-      status: string
-    }
+    spaceMember: SpaceMember
   }): Promise<void> {
     return
   }
 
-  async decideRequest(params: {
-    id: number
+  async decideRequest(params: SpaceMember): Promise<void> {
+    return
+  }
+
+  async acceptInvitation(params: {
     spaceId: string
-    userId: string
-    email: string
-    role: string
-    status: string
+    spaceMember: SpaceMember
   }): Promise<void> {
     return
   }

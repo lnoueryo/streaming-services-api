@@ -24,20 +24,31 @@ export type IRoomService = {
   requestEntry(params: {
     spaceId: string
     spaceMember: {
-      id: number
+      id: string
       spaceId: string
-      userId: string
+      userId?: string | null
       email: string
       role: string
       status: string
     }
   }): Promise<void>
   decideRequest(params: {
-    id: number
+    id: string
     spaceId: string
-    userId: string
+    userId?: string | null
     email: string
     role: string
     status: string
+  }): Promise<void>
+  acceptInvitation(params: {
+    spaceId: string
+    spaceMember: {
+      id: string
+      spaceId: string
+      userId?: string | null
+      email: string
+      role: string
+      status: string
+    }
   }): Promise<void>
 }

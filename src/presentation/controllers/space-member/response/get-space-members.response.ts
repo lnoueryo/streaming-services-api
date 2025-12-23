@@ -3,7 +3,7 @@ export class GetSpaceMemberResponse {
 
   constructor(
     params: {
-      id: number
+      id: string
       spaceId: string
       userId?: string
       email: string

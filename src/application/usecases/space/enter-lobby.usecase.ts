@@ -7,6 +7,7 @@ import { DomainError } from 'src/domain/errors/domain-error'
 import { Space } from 'src/domain/entities/space.entity'
 import { Room } from 'src/domain/entities/room.entity'
 import { SpaceMember } from 'src/domain/entities/space-member.entity'
+import { InviteSpaceService } from 'src/domain/services/space/invite-space.service'
 
 type ErrorType = 'forbidden' | 'not-found' | 'internal'
 
@@ -16,7 +17,9 @@ export class EnterLobbyUseCase {
     @Inject(ISpaceRepository)
     private readonly spaceRepository: ISpaceRepository,
     @Inject(ISignalingGateway)
-    private readonly signalingGateway: ISignalingGateway
+    private readonly signalingGateway: ISignalingGateway,
+    @Inject(InviteSpaceService)
+    private readonly inviteSpaceService: InviteSpaceService
   ) {}
 
   async do(params: {
@@ -28,15 +31,28 @@ export class EnterLobbyUseCase {
       if (!space) {
         return this.error('not-found', 'スペースが存在しません')
       }
-
       const spaceMember = space.ensureMemberCanEnterLobby(params.user.email)
+      const invitationToken = spaceMember?.isOwner()
+        ? this.inviteSpaceService.generate(space)
+        : undefined
       try {
         const room = await this.signalingGateway.getRoom(params)
-        return this.success({ space, spaceMember, room, user: params.user })
+        return this.success({
+          space,
+          spaceMember,
+          room,
+          user: params.user,
+          invitationToken
+        })
       } catch (error) {
         if (error instanceof DomainError) {
           if (error.type === 'not-found') {
-            return this.success({ space, spaceMember, user: params.user })
+            return this.success({
+              space,
+              spaceMember,
+              user: params.user,
+              invitationToken
+            })
           }
         }
         throw error
@@ -63,12 +79,14 @@ export class EnterLobbyUseCase {
     space,
     spaceMember,
     room,
-    user
+    user,
+    invitationToken
   }: {
     space: Space
     spaceMember?: SpaceMember
     room?: Room
     user: { id: string }
+    invitationToken?: string
   }) {
     return {
       success: new GetRoomDto({
@@ -81,7 +99,8 @@ export class EnterLobbyUseCase {
           status: spaceMember?.status || 'approved'
         },
         participants: room?.participants || [],
-        isParticipated: room?.isUserParticipated(user.id) || false
+        isParticipated: room?.isUserParticipated(user.id) || false,
+        invitationToken
       })
     }
   }

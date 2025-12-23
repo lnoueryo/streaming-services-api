@@ -1,15 +1,12 @@
-import { Inject, Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { ISpaceMemberRepository } from 'src/application/ports/repositories/space-member.repository'
 import { SpaceMember } from 'src/domain/entities/space-member.entity'
-import { IPrismaClient, PrismaFactory } from 'src/infrastructure/plugins/prisma'
+import { PrismaService } from 'src/infrastructure/plugins/prisma'
 
 @Injectable()
 export class SpaceMemberRepository implements ISpaceMemberRepository {
-  private readonly prisma: IPrismaClient
-  constructor(private readonly factory: PrismaFactory) {
-    this.prisma = this.factory.create()
-  }
-  async find(id: number): Promise<SpaceMember | null> {
+  constructor(private readonly prisma: PrismaService) {}
+  async find(id: string): Promise<SpaceMember | null> {
     const spaceMember = await this.prisma.spaceMember.findUnique({
       where: {
         id
@@ -64,6 +61,18 @@ export class SpaceMemberRepository implements ISpaceMemberRepository {
     })
     return new SpaceMember(spaceMember)
   }
+  async createMany(params: SpaceMember[]): Promise<void> {
+    await this.prisma.spaceMember.createMany({
+      data: params.map((member) => ({
+        id: member.id,
+        spaceId: member.spaceId,
+        userId: member.userId,
+        email: member.email,
+        role: member.role,
+        status: member.status
+      }))
+    })
+  }
   async update(spaceMember: SpaceMember): Promise<SpaceMember> {
     const updatedSpaceMember = await this.prisma.spaceMember.update({
       where: {
@@ -105,5 +114,8 @@ export class SpaceMemberRepository implements ISpaceMemberRepository {
       }
     })
     return new SpaceMember(spaceMember)
+  }
+  transaction(tx: PrismaService) {
+    return new SpaceMemberRepository(tx)
   }
 }

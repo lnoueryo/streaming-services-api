@@ -4,7 +4,7 @@ import { GetPublicSpaceUseCase } from 'src/application/usecases/space/get-public
 import { CreateSpaceUseCase } from 'src/application/usecases/space/create-space.usecase'
 import { SpaceController } from 'src/presentation/controllers/space/space.controller'
 import { SpaceRepository } from 'src/infrastructure/repositories/space.repository'
-import { PrismaFactory } from '../../../infrastructure/plugins/prisma'
+import { PrismaService } from '../../../infrastructure/plugins/prisma'
 import { EnterLobbyUseCase } from 'src/application/usecases/space/enter-lobby.usecase'
 import { ISignalingGateway } from 'src/application/ports/gateways/signaling.gateway'
 import { SignalingGateway } from 'src/infrastructure/gateways/grpc/signaling.gateway'
@@ -26,7 +26,7 @@ import { GrpcClientFactory } from 'src/infrastructure/plugins/micro-services'
     EnterLobbyUseCase,
     EnableEntryUseCase,
     AxiosFactory,
-    PrismaFactory,
+    PrismaService,
     JwtFactory,
     GrpcClientFactory,
     InviteSpaceService,

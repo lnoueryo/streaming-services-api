@@ -9,6 +9,7 @@ import { Participant } from 'src/domain/entities/participant.entity'
 import { Room } from 'src/domain/entities/room.entity'
 import { ISpaceMemberRepository } from 'src/application/ports/repositories/space-member.repository'
 import { SpaceMember } from 'src/domain/entities/space-member.entity'
+import { InviteSpaceService } from 'src/domain/services/space/invite-space.service'
 
 type EnableEntryUseCaseResult = {
   id: string
@@ -31,7 +32,9 @@ export class EnableEntryUseCase {
     @Inject(ISpaceMemberRepository)
     private readonly spaceMemberRepository: ISpaceMemberRepository,
     @Inject(ISignalingGateway)
-    private readonly signalingGateway: ISignalingGateway
+    private readonly signalingGateway: ISignalingGateway,
+    @Inject(InviteSpaceService)
+    private readonly inviteSpaceService: InviteSpaceService
   ) {}
 
   async do(params: {
@@ -44,11 +47,13 @@ export class EnableEntryUseCase {
       if (!space) {
         return this.error('not-found', 'スペースが存在しません')
       }
-
       const spaceMember = space.ensureMemberCanEnterRoom(params.user.email)
       if (!spaceMember) {
         return this.success({ space, user: params.user })
       }
+      const invitationToken = spaceMember?.isOwner()
+        ? this.inviteSpaceService.generate(space)
+        : undefined
       try {
         if (params.body.force) {
           await this.signalingGateway.removeParticipant(params)
@@ -57,7 +62,13 @@ export class EnableEntryUseCase {
         spaceMember.enterRoom()
         await this.spaceMemberRepository.update(spaceMember)
         const room = await this.signalingGateway.getRoom(params)
-        return this.success({ space, spaceMember, room, user: params.user })
+        return this.success({
+          space,
+          spaceMember,
+          room,
+          user: params.user,
+          invitationToken
+        })
       } catch (error) {
         if (error instanceof DomainError) {
           if (error.code === 'invitation-not-accepted') {
@@ -75,7 +86,12 @@ export class EnableEntryUseCase {
             )
           }
           if (error.type === 'not-found') {
-            return this.success({ space, spaceMember, user: params.user })
+            return this.success({
+              space,
+              spaceMember,
+              user: params.user,
+              invitationToken
+            })
           }
         }
         throw error
@@ -99,12 +115,14 @@ export class EnableEntryUseCase {
     space,
     spaceMember,
     room,
-    user
+    user,
+    invitationToken
   }: {
     space: Space
     spaceMember?: SpaceMember
     room?: Room
     user: { id: string }
+    invitationToken?: string
   }) {
     return {
       success: new GetRoomDto({
@@ -112,11 +130,13 @@ export class EnableEntryUseCase {
         name: space.name || undefined,
         privacy: space.privacy,
         membership: {
+          // TODO: publicでも一応SpaceMemberは必要かも？
           role: spaceMember?.role || 'member',
           status: spaceMember?.status || 'approved'
         },
         participants: room?.participants || [],
-        isParticipated: room?.isUserParticipated(user.id) || false
+        isParticipated: room?.isUserParticipated(user.id) || false,
+        invitationToken
       })
     }
   }
