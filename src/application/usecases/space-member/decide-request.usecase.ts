@@ -60,14 +60,7 @@ export class DecideRequestUseCase {
         decision: input.body.status
       })
       const updatedMember = await this.spaceMemberRepository.update(spaceMember)
-      await this.signalingGateway.decideRequest({
-        id: updatedMember.id,
-        spaceId: updatedMember.spaceId,
-        userId: updatedMember.userId!,
-        email: updatedMember.email,
-        role: updatedMember.role,
-        status: updatedMember.status
-      })
+      await this.signalingGateway.decideRequest(updatedMember)
       return {
         success: {
           id: updatedMember.id!,

@@ -5,6 +5,8 @@ import { InviteSpaceService } from 'src/domain/services/space/invite-space.servi
 import { ISpaceMemberRepository } from 'src/application/ports/repositories/space-member.repository'
 import { Space } from 'src/domain/entities/space.entity'
 import { DomainError } from 'src/domain/errors/domain-error'
+import { ISignalingGateway } from 'src/application/ports/gateways/signaling.gateway'
+import { SpaceMember } from 'src/domain/entities/space-member.entity'
 
 type AcceptSpaceInviteUseCaseResult = {
   redirect: string
@@ -24,7 +26,9 @@ export class AcceptSpaceInviteUseCase {
     @Inject(ISpaceMemberRepository)
     private readonly spaceMemberRepository: ISpaceMemberRepository,
     @Inject(InviteSpaceService)
-    private readonly inviteSpaceService: InviteSpaceService
+    private readonly inviteSpaceService: InviteSpaceService,
+    @Inject(ISignalingGateway)
+    private readonly signalingGateway: ISignalingGateway
   ) {}
 
   async do(params: {
@@ -47,8 +51,11 @@ export class AcceptSpaceInviteUseCase {
         )
         if (spaceMember) {
           await this.spaceMemberRepository.upsert(spaceMember)
+          await this.signalingGateway.acceptInvitation({
+            spaceId: space.id,
+            spaceMember
+          })
         }
-
         return this.success(space)
       } else if (space.isPrivate()) {
         const spaceMember = space.allowMemberToAcceptPrivateInvitation(
@@ -57,6 +64,10 @@ export class AcceptSpaceInviteUseCase {
         )
         if (spaceMember) {
           await this.spaceMemberRepository.upsert(spaceMember)
+          await this.signalingGateway.acceptInvitation({
+            spaceId: space.id,
+            spaceMember
+          })
         }
         return this.success(space)
       }
@@ -74,6 +85,7 @@ export class AcceptSpaceInviteUseCase {
       return this.error('internal', 'サーバーエラーが発生しました')
     }
   }
+
   private success(space: Space) {
     return {
       success: {

@@ -48,7 +48,6 @@ export class InviteSpaceMemberUseCase {
       await this.prisma.$transaction(async (tx) => {
         await this.spaceMemberRepository.transaction(tx).createMany(spaceMembers)
       })
-
       return {
         success: spaceMembers.map((member) => ({
           id: member.id,
