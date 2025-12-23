@@ -51,7 +51,9 @@ export class EnableEntryUseCase {
       if (!spaceMember) {
         return this.success({ space, user: params.user })
       }
-      const invitationToken = spaceMember?.isOwner() ? this.inviteSpaceService.generate(space) : undefined
+      const invitationToken = spaceMember?.isOwner()
+        ? this.inviteSpaceService.generate(space)
+        : undefined
       try {
         if (params.body.force) {
           await this.signalingGateway.removeParticipant(params)
@@ -60,7 +62,13 @@ export class EnableEntryUseCase {
         spaceMember.enterRoom()
         await this.spaceMemberRepository.update(spaceMember)
         const room = await this.signalingGateway.getRoom(params)
-        return this.success({ space, spaceMember, room, user: params.user, invitationToken })
+        return this.success({
+          space,
+          spaceMember,
+          room,
+          user: params.user,
+          invitationToken
+        })
       } catch (error) {
         if (error instanceof DomainError) {
           if (error.code === 'invitation-not-accepted') {
@@ -78,7 +86,12 @@ export class EnableEntryUseCase {
             )
           }
           if (error.type === 'not-found') {
-            return this.success({ space, spaceMember, user: params.user, invitationToken })
+            return this.success({
+              space,
+              spaceMember,
+              user: params.user,
+              invitationToken
+            })
           }
         }
         throw error
@@ -103,12 +116,12 @@ export class EnableEntryUseCase {
     spaceMember,
     room,
     user,
-    invitationToken,
+    invitationToken
   }: {
     space: Space
     spaceMember?: SpaceMember
     room?: Room
-    user: { id: string },
+    user: { id: string }
     invitationToken?: string
   }) {
     return {
@@ -123,7 +136,7 @@ export class EnableEntryUseCase {
         },
         participants: room?.participants || [],
         isParticipated: room?.isUserParticipated(user.id) || false,
-        invitationToken,
+        invitationToken
       })
     }
   }

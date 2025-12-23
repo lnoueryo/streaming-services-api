@@ -69,7 +69,7 @@ export class SpaceMemberRepository implements ISpaceMemberRepository {
         userId: member.userId,
         email: member.email,
         role: member.role,
-        status: member.status,
+        status: member.status
       }))
     })
   }

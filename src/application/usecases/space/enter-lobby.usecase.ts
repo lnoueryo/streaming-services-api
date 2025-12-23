@@ -32,14 +32,27 @@ export class EnterLobbyUseCase {
         return this.error('not-found', 'スペースが存在しません')
       }
       const spaceMember = space.ensureMemberCanEnterLobby(params.user.email)
-      const invitationToken = spaceMember?.isOwner() ? this.inviteSpaceService.generate(space) : undefined
+      const invitationToken = spaceMember?.isOwner()
+        ? this.inviteSpaceService.generate(space)
+        : undefined
       try {
         const room = await this.signalingGateway.getRoom(params)
-        return this.success({ space, spaceMember, room, user: params.user, invitationToken })
+        return this.success({
+          space,
+          spaceMember,
+          room,
+          user: params.user,
+          invitationToken
+        })
       } catch (error) {
         if (error instanceof DomainError) {
           if (error.type === 'not-found') {
-            return this.success({ space, spaceMember, user: params.user, invitationToken })
+            return this.success({
+              space,
+              spaceMember,
+              user: params.user,
+              invitationToken
+            })
           }
         }
         throw error
@@ -72,7 +85,7 @@ export class EnterLobbyUseCase {
     space: Space
     spaceMember?: SpaceMember
     room?: Room
-    user: { id: string },
+    user: { id: string }
     invitationToken?: string
   }) {
     return {

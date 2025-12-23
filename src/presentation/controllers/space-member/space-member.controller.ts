@@ -1,11 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Patch,
-  Post
-} from '@nestjs/common'
+import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common'
 import { ApiTags, ApiResponse } from '@nestjs/swagger'
 import { AuthUser } from '../../interceptors/auth-user.decorator'
 import { AuthUserRequest } from '../shared/auth.request'
@@ -58,7 +51,7 @@ export class SpaceMemberController {
   async inviteMembers(
     @Param('spaceId') spaceId: string,
     @AuthUser() user: AuthUserRequest,
-    @Body() body: { members: { email: string, role: 'member' | 'admin' }[] }
+    @Body() body: { members: { email: string; role: 'member' | 'admin' }[] }
   ): Promise<GetSpaceMemberResponse> {
     const result = await this.inviteSpaceMembersUseCase.do({
       spaceId,

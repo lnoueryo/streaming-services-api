@@ -5,7 +5,8 @@ export const ISpaceMemberRepository = Symbol('ISpaceMemberRepository')
 
 export type MemberStatus = 'approved' | 'pending' | 'rejected' | 'none'
 
-export interface ISpaceMemberRepository extends IRepository<ISpaceMemberRepository> {
+export interface ISpaceMemberRepository
+  extends IRepository<ISpaceMemberRepository> {
   find(id: string): Promise<SpaceMember | null>
   findMany(criteria: { spaceId?: string }): Promise<SpaceMember[]>
   findByEmail(params: {

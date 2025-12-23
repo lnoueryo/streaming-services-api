@@ -32,10 +32,14 @@ export class PrismaFactory {
 }
 
 @Injectable()
-export class PrismaService extends PrismaClient implements Omit<PrismaClient, "$connect" | "$disconnect" | "$on" | "$transaction" | "$extends"> {}
+export class PrismaService
+  extends PrismaClient
+  implements
+    Omit<
+      PrismaClient,
+      '$connect' | '$disconnect' | '$on' | '$transaction' | '$extends'
+    > {}
 
 // export type IPrismaClient = Omit<PrismaClient, "$connect" | "$disconnect" | "$on" | "$transaction" | "$extends">
 
-export type IPrismaClient =
-  | PrismaService
-  | Prisma.TransactionClient
+export type IPrismaClient = PrismaService | Prisma.TransactionClient

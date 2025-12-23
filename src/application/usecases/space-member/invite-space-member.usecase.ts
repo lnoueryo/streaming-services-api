@@ -42,11 +42,13 @@ export class InviteSpaceMemberUseCase {
           spaceId: input.spaceId,
           email: member.email,
           role: member.role,
-          status: SpaceMember.initialStatus(member.role),
+          status: SpaceMember.initialStatus(member.role)
         })
       })
       await this.prisma.$transaction(async (tx) => {
-        await this.spaceMemberRepository.transaction(tx).createMany(spaceMembers)
+        await this.spaceMemberRepository
+          .transaction(tx)
+          .createMany(spaceMembers)
       })
       return {
         success: spaceMembers.map((member) => ({
@@ -54,7 +56,7 @@ export class InviteSpaceMemberUseCase {
           spaceId: member.spaceId,
           email: member.email,
           role: member.role,
-          status: member.status,
+          status: member.status
         }))
       }
     } catch (error) {

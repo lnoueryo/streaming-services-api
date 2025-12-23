@@ -52,7 +52,7 @@ export class SignalingGateway implements ISignalingGateway {
     return
   }
 
-  async acceptInvitation (params: {
+  async acceptInvitation(params: {
     spaceId: string
     spaceMember: SpaceMember
   }): Promise<void> {
