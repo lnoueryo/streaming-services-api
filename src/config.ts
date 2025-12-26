@@ -44,8 +44,10 @@ const config: Config = {
 type ConfigEnv = {
   allowOrigin: string
   signalingApiOrigin: string
+  mediaApiOrigin: string
   protoPath: {
     signaling: string
+    media: string
     application: string
   }
 }
@@ -57,17 +59,27 @@ const configEnvs: { [K in STAGE]: ConfigEnv } = {
     allowOrigin: 'https://streaming.localtest.me',
     // signalingApiOrigin: 'http://streaming-signaling:8080',
     signalingApiOrigin: 'streaming-signaling:50051',
+    mediaApiOrigin: 'streaming-media:50051',
     protoPath: {
-      signaling: join(process.cwd(), 'src/proto/signaling.proto'),
-      application: join(process.cwd(), 'src/proto/application.proto')
+      signaling: join(process.cwd(), 'src/proto/signaling/signaling.proto'),
+      media: join(process.cwd(), 'src/proto/media/media.proto'),
+      application: join(
+        process.cwd(),
+        'src/proto/application/application.proto'
+      )
     }
   },
   production: {
     allowOrigin: 'https://streaming.jounetsism.biz',
     signalingApiOrigin: 'streaming-signaling:50051',
+    mediaApiOrigin: 'streaming-media:50051',
     protoPath: {
-      signaling: join(process.cwd(), 'src/proto/signaling.proto'),
-      application: join(process.cwd(), 'src/proto/application.proto')
+      signaling: join(process.cwd(), 'src/proto/signaling/signaling.proto'),
+      media: join(process.cwd(), 'src/proto/media/media.proto'),
+      application: join(
+        process.cwd(),
+        'src/proto/application/application.proto'
+      )
     }
   }
 }

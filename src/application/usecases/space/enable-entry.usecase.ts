@@ -1,7 +1,6 @@
 import { Inject, Injectable, Logger } from '@nestjs/common'
 import { ISpaceRepository } from 'src/application/ports/repositories/space.repository'
 import { UseCaseResult } from 'src/application/ports/usecases/usecase-result'
-import { ISignalingGateway } from 'src/application/ports/gateways/signaling.gateway'
 import { GetRoomDto } from './dto/get-room.dto'
 import { DomainError } from 'src/domain/errors/domain-error'
 import { Space, SpacePrivacy } from 'src/domain/entities/space.entity'
@@ -10,6 +9,8 @@ import { Room } from 'src/domain/entities/room.entity'
 import { ISpaceMemberRepository } from 'src/application/ports/repositories/space-member.repository'
 import { SpaceMember } from 'src/domain/entities/space-member.entity'
 import { InviteSpaceService } from 'src/domain/services/space/invite-space.service'
+import { IMediaGateway } from 'src/application/ports/gateways/media.gateway'
+import { PrismaService } from 'src/infrastructure/plugins/prisma'
 
 type EnableEntryUseCaseResult = {
   id: string
@@ -22,7 +23,7 @@ type EnableEntryUseCaseResult = {
   isParticipated: boolean
 }
 
-type ErrorType = 'forbidden' | 'not-found' | 'internal'
+type ErrorType = 'forbidden' | 'not-found' | 'conflict' | 'internal'
 
 @Injectable()
 export class EnableEntryUseCase {
@@ -31,15 +32,16 @@ export class EnableEntryUseCase {
     private readonly spaceRepository: ISpaceRepository,
     @Inject(ISpaceMemberRepository)
     private readonly spaceMemberRepository: ISpaceMemberRepository,
-    @Inject(ISignalingGateway)
-    private readonly signalingGateway: ISignalingGateway,
+    @Inject(IMediaGateway)
+    private readonly mediaGateway: IMediaGateway,
     @Inject(InviteSpaceService)
-    private readonly inviteSpaceService: InviteSpaceService
+    private readonly inviteSpaceService: InviteSpaceService,
+    private readonly prisma: PrismaService
   ) {}
 
   async do(params: {
     spaceId: string
-    user: { id: string; email: string; token: string }
+    user: { id: string; email: string; name: string; image: string }
     body: { force?: boolean }
   }): Promise<UseCaseResult<EnableEntryUseCaseResult, ErrorType>> {
     try {
@@ -56,12 +58,20 @@ export class EnableEntryUseCase {
         : undefined
       try {
         if (params.body.force) {
-          await this.signalingGateway.removeParticipant(params)
-          //TODO: 削除対象がない場合、2度APIを叩いている可能性がある。同時に呼び出されたら両方入室してしまうため、ここではエラーを返すべき
+          await this.mediaGateway.removeParticipant(params)
         }
         spaceMember.enterRoom()
-        await this.spaceMemberRepository.update(spaceMember)
-        const room = await this.signalingGateway.getRoom(params)
+        const room = await this.prisma.$transaction(async (tx) => {
+          const spaceMemberRepository =
+            this.spaceMemberRepository.transaction(tx)
+          await spaceMemberRepository.update(spaceMember)
+          console.log('createPeer')
+          return await this.mediaGateway.createPeer({
+            spaceId: space.id,
+            spaceMember,
+            user: params.user
+          })
+        })
         return this.success({
           space,
           spaceMember,
@@ -82,6 +92,20 @@ export class EnableEntryUseCase {
             return this.error(
               'forbidden',
               'Roomへの参加には承認が必要です。Ownerは準備中なのでそのまま許可をお待ちください。',
+              error.code
+            )
+          }
+          if (error.code === 'no-target-user') {
+            return this.error(
+              'not-found',
+              '対象の参加者が存在しません。時間をおいてからもう一度ルームに参加してください。',
+              error.code
+            )
+          }
+          if (error.code === 'participant-already-exists') {
+            return this.error(
+              'conflict',
+              error.message,
               error.code
             )
           }

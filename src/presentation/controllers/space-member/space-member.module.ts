@@ -13,6 +13,8 @@ import { JwtFactory } from 'src/infrastructure/plugins/jwt'
 import { GetTargetSpaceMemberUseCase } from 'src/application/usecases/space-member/get-target-space-member.usecase'
 import { GetSpaceMemberUseCase } from 'src/application/usecases/space-member/get-space-member.usecase'
 import { InviteSpaceMemberUseCase } from 'src/application/usecases/space-member/invite-space-member.usecase'
+import { MediaGateway } from 'src/infrastructure/gateways/grpc/media.gateway'
+import { IMediaGateway } from 'src/application/ports/gateways/media.gateway'
 
 @Module({
   controllers: [SpaceMemberController],
@@ -37,8 +39,16 @@ import { InviteSpaceMemberUseCase } from 'src/application/usecases/space-member/
     {
       provide: ISignalingGateway,
       useClass: SignalingGateway
+    },
+    {
+      provide: ISignalingGateway,
+      useClass: SignalingGateway
+    },
+    {
+      provide: IMediaGateway,
+      useClass: MediaGateway
     }
   ],
-  exports: [ISpaceMemberRepository, ISignalingGateway]
+  exports: [ISpaceMemberRepository, ISignalingGateway, IMediaGateway]
 })
 export class SpaceMemberModule {}

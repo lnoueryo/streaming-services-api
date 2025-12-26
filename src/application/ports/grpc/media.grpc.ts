@@ -1,4 +1,6 @@
-export const IRoomService = Symbol('IRoomService')
+import { Room } from "src/domain/entities/room.entity"
+
+export const IMediaService = Symbol('IMediaService')
 
 type Participant = {
   id: string
@@ -7,15 +9,10 @@ type Participant = {
   image: string
 }
 
-export type IRoomService = {
+export type IMediaService = {
   getRoom(params: { spaceId: string }): Promise<{
     id: string
-    participants: {
-      id: string
-      name: string
-      email: string
-      image: string
-    }[]
+    participants: Participant[]
   }>
   removeParticipant(params: { spaceId: string; userId: string }): Promise<{
     id: string
@@ -32,14 +29,6 @@ export type IRoomService = {
       status: string
     }
   }): Promise<void>
-  decideRequest(params: {
-    id: string
-    spaceId: string
-    userId?: string | null
-    email: string
-    role: string
-    status: string
-  }): Promise<void>
   acceptInvitation(params: {
     spaceId: string
     spaceMember: {
@@ -51,4 +40,16 @@ export type IRoomService = {
       status: string
     }
   }): Promise<void>
+  createPeer(params: {
+    spaceId: string
+    spaceMember: {
+      id: string
+      spaceId: string
+      userId?: string | null
+      email: string
+      role: string
+      status: string
+    }
+    user: { id: string; name: string; email: string; image: string }
+  }): Promise<Room>
 }

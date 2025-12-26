@@ -31,7 +31,7 @@ const authByCookieSession = async (req: any) => {
       id: decodedSession.uid,
       email: decodedSession.email,
       name: decodedSession.name,
-      session: sessionCookie
+      image: decodedSession.image,
     })
     req.user = user
     return user
@@ -55,7 +55,7 @@ const authByAuthorization = async (req: any) => {
       id: decodedToken.uid,
       email: decodedToken.email,
       name: decodedToken.name,
-      token
+      image: decodedToken.image,
     })
     req.user = user
     return user
