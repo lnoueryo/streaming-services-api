@@ -65,7 +65,6 @@ export class EnableEntryUseCase {
           const spaceMemberRepository =
             this.spaceMemberRepository.transaction(tx)
           await spaceMemberRepository.update(spaceMember)
-          console.log('createPeer')
           return await this.mediaGateway.createPeer({
             spaceId: space.id,
             spaceMember,
