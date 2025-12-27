@@ -36,29 +36,11 @@ export class MediaGateway implements IMediaGateway {
     return new Room(response)
   }
 
-  async requestEntry(params: {
+  async changeMemberState(params: {
     spaceId: string
     spaceMember: SpaceMember
   }): Promise<void> {
-    await this.mediaService.requestEntry({
-      spaceId: params.spaceId,
-      spaceMember: {
-        id: params.spaceMember.id,
-        spaceId: params.spaceMember.spaceId,
-        userId: params.spaceMember.userId,
-        email: params.spaceMember.email,
-        role: params.spaceMember.role,
-        status: params.spaceMember.status
-      }
-    })
-    return
-  }
-
-  async acceptInvitation(params: {
-    spaceId: string
-    spaceMember: SpaceMember
-  }): Promise<void> {
-    await this.mediaService.acceptInvitation({
+    await this.mediaService.changeMemberState({
       spaceId: params.spaceId,
       spaceMember: {
         id: params.spaceMember.id,

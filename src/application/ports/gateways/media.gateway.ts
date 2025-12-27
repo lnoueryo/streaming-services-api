@@ -9,11 +9,7 @@ export type IMediaGateway = {
     spaceId: string
     user: { id: string }
   }) => Promise<Room>
-  requestEntry: (params: {
-    spaceId: string
-    spaceMember: SpaceMember
-  }) => Promise<void>
-  acceptInvitation: (params: {
+  changeMemberState: (params: {
     spaceId: string
     spaceMember: SpaceMember
   }) => Promise<void>

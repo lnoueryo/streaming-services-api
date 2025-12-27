@@ -18,18 +18,7 @@ export type IMediaService = {
     id: string
     participants: Participant[]
   }>
-  requestEntry(params: {
-    spaceId: string
-    spaceMember: {
-      id: string
-      spaceId: string
-      userId?: string | null
-      email: string
-      role: string
-      status: string
-    }
-  }): Promise<void>
-  acceptInvitation(params: {
+  changeMemberState(params: {
     spaceId: string
     spaceMember: {
       id: string

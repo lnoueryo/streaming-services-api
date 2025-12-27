@@ -1,5 +1,6 @@
 import { Inject, Injectable, Logger } from '@nestjs/common'
 import { SpaceMember } from '@prisma/client'
+import { IMediaGateway } from 'src/application/ports/gateways/media.gateway'
 import { ISignalingGateway } from 'src/application/ports/gateways/signaling.gateway'
 import { ISpaceMemberRepository } from 'src/application/ports/repositories/space-member.repository'
 import { UseCaseResult } from 'src/application/ports/usecases/usecase-result'
@@ -15,7 +16,9 @@ export class DecideRequestUseCase {
     @Inject(EntryRequestDecisionService)
     private readonly entryRequestDecisionService: EntryRequestDecisionService,
     @Inject(ISignalingGateway)
-    private readonly signalingGateway: ISignalingGateway
+    private readonly signalingGateway: ISignalingGateway,
+    @Inject(IMediaGateway)
+    private readonly mediaGateway: IMediaGateway
   ) {}
   async do(input: {
     params: { spaceId: string; spaceMemberId: string }
@@ -60,7 +63,18 @@ export class DecideRequestUseCase {
         decision: input.body.status
       })
       const updatedMember = await this.spaceMemberRepository.update(spaceMember)
-      await this.signalingGateway.decideRequest(updatedMember)
+      try {
+        await Promise.all([
+          this.signalingGateway.decideRequest(updatedMember),
+          this.mediaGateway.changeMemberState({
+            spaceId: input.params.spaceId,
+            spaceMember: updatedMember
+          })
+        ])
+      } catch (error) {
+        Logger.warn(error)
+        // signalingやmediaで失敗しても、状態は更新されているので成功
+      }
       return {
         success: {
           id: updatedMember.id!,

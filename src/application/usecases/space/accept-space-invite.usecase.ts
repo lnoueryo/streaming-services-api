@@ -56,7 +56,7 @@ export class AcceptSpaceInviteUseCase {
               this.spaceMemberRepository.transaction(tx)
             await spaceMemberRepository.upsert(spaceMember)
             try {
-              await this.mediaGateway.acceptInvitation({
+              await this.mediaGateway.changeMemberState({
                 spaceId: space.id,
                 spaceMember
               })
@@ -83,7 +83,7 @@ export class AcceptSpaceInviteUseCase {
               this.spaceMemberRepository.transaction(tx)
             await spaceMemberRepository.upsert(spaceMember)
             try {
-              await this.mediaGateway.acceptInvitation({
+              await this.mediaGateway.changeMemberState({
                 spaceId: space.id,
                 spaceMember
               })

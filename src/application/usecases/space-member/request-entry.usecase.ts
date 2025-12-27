@@ -60,7 +60,7 @@ export class RequestEntryUseCase {
         const updatedSpaceMember =
           await spaceMemberRepository.update(spaceMember)
         try {
-          await this.mediaGateway.requestEntry({
+          await this.mediaGateway.changeMemberState({
             spaceId: input.spaceId,
             spaceMember: updatedSpaceMember
           })

@@ -41,18 +41,12 @@ export class SignalingGateway implements ISignalingGateway {
     })
     return new Room(resp.data)
   }
-  async requestEntry(params: {
-    spaceId: string
-    spaceMember: SpaceMember
-  }): Promise<void> {
-    return
-  }
 
   async decideRequest(params: SpaceMember): Promise<void> {
     return
   }
 
-  async acceptInvitation(params: {
+  async changeMemberState(params: {
     spaceId: string
     spaceMember: SpaceMember
   }): Promise<void> {
