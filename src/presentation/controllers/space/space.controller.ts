@@ -24,6 +24,7 @@ import { CreateSpaceRequest } from './request/create-space.request'
 import { AcceptSpaceInviteUseCase } from 'src/application/usecases/space/accept-space-invite.usecase'
 import { AcceptSpaceInviteResponse } from './response/accept-space-invite.response'
 import { CreateSpaceResponse } from './response/create-space.response'
+import { GetTargetSpaceUseCase } from 'src/application/usecases/space/get-target-space.usecase'
 
 @ApiTags('spaces')
 @Controller({
@@ -34,6 +35,7 @@ export class SpaceController {
     private readonly getPublicSpaceUseCase: GetPublicSpaceUseCase,
     private readonly createSpaceUseCase: CreateSpaceUseCase,
     private readonly acceptSpaceInviteUseCase: AcceptSpaceInviteUseCase,
+    private readonly getTargetSpaceUseCase: GetTargetSpaceUseCase,
     private readonly enterLobbyUseCase: EnterLobbyUseCase,
     private readonly enableEntryUseCase: EnableEntryUseCase
   ) {}
@@ -62,7 +64,7 @@ export class SpaceController {
     return new CreateSpaceResponse(result.success)
   }
   @Get('/invite/:hash')
-  @ApiResponse({ status: 200, type: GetTargetSpaceResponse })
+  @ApiResponse({ status: 200, type: AcceptSpaceInviteResponse })
   async acceptSpaceInvite(
     @Param('hash') hash: string,
     @AuthUser() user: AuthUserRequest
@@ -72,6 +74,19 @@ export class SpaceController {
       throw new HttpErrorCodeException(result.error)
     }
     return new AcceptSpaceInviteResponse(result.success)
+  }
+  @Get('/:id')
+  @ApiResponse({ status: 200, type: Space })
+  async getTargetSpace(
+    @Param() params: { id: string },
+    @AuthUser() _: AuthUserRequest
+    // TODO: admin only
+  ): Promise<GetTargetSpaceResponse> {
+    const result = await this.getTargetSpaceUseCase.do(params)
+    if ('error' in result) {
+      throw new HttpErrorCodeException(result.error)
+    }
+    return new GetTargetSpaceResponse(result.success)
   }
   @Get('/:id/lobby')
   @ApiResponse({ status: 200, type: GetRoomResponse })

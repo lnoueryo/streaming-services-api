@@ -1,7 +1,10 @@
-import { GetTargetSpaceResponse } from './get-target-space.response'
 
 export class AcceptSpaceInviteResponse {
-  space: GetTargetSpaceResponse
+  space: {
+    id: string
+    name?: string
+    privacy: string
+  }
   redirect: string
 
   constructor(params: {

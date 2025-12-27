@@ -9,6 +9,7 @@ export class CreateSpaceResponse {
       id: string
       name?: string
       privacy: string
+      creatorId: string
     }
     url: string
   }) {
