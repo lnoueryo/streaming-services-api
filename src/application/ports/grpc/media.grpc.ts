@@ -1,4 +1,4 @@
-import { Room } from "src/domain/entities/room.entity"
+import { Room } from 'src/domain/entities/room.entity'
 
 export const IMediaService = Symbol('IMediaService')
 

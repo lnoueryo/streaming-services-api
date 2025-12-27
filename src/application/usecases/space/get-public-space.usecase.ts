@@ -9,29 +9,31 @@ export class GetPublicSpaceUseCase {
     private readonly spaceRepository: ISpaceRepository
   ) {}
 
-  async do(params: {
-    page: number
-    limit: number
-  }): Promise<UseCaseResult<{
-    spaces: {
-      id: string
-      name?: string
-      privacy: string
-      creatorId: string
-      spaceMembers: {
-        id: string
-        spaceId: string
-        userId?: string
-        email: string
-        role: string
-        status: string
-      }[]
-    }[]
-    page: number
-    limit: number
-    total: number
-    totalPages: number
-  }, 'internal'>> {
+  async do(params: { page: number; limit: number }): Promise<
+    UseCaseResult<
+      {
+        spaces: {
+          id: string
+          name?: string
+          privacy: string
+          creatorId: string
+          spaceMembers: {
+            id: string
+            spaceId: string
+            userId?: string
+            email: string
+            role: string
+            status: string
+          }[]
+        }[]
+        page: number
+        limit: number
+        total: number
+        totalPages: number
+      },
+      'internal'
+    >
+  > {
     try {
       const { page, limit } = params
       const [spaces, total] = await Promise.all([
@@ -40,7 +42,7 @@ export class GetPublicSpaceUseCase {
       ])
       return {
         success: {
-          spaces: spaces.map(space => ({
+          spaces: spaces.map((space) => ({
             id: space.id,
             name: space.name || undefined,
             privacy: space.privacy,

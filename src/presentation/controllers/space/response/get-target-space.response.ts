@@ -12,23 +12,20 @@ export class GetTargetSpaceResponse {
     status: string
   }[]
 
-  constructor(
-    params:
-    {
+  constructor(params: {
+    id: string
+    name?: string
+    privacy: string
+    creatorId: string
+    spaceMembers: {
       id: string
-      name?: string
-      privacy: string
-      creatorId: string
-      spaceMembers: {
-        id: string
-        spaceId: string
-        userId?: string
-        email: string
-        role: string
-        status: string
-      }[]
-    }
-  ) {
+      spaceId: string
+      userId?: string
+      email: string
+      role: string
+      status: string
+    }[]
+  }) {
     this.id = params.id
     this.name = params.name
     this.privacy = params.privacy

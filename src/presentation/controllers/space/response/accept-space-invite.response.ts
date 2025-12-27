@@ -1,4 +1,3 @@
-
 export class AcceptSpaceInviteResponse {
   space: {
     id: string

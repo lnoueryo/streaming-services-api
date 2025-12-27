@@ -24,7 +24,7 @@ export class EnterLobbyUseCase {
 
   async do(params: {
     spaceId: string
-    user: { id: string; email: string; }
+    user: { id: string; email: string }
   }): Promise<UseCaseResult<GetRoomDto, ErrorType>> {
     try {
       const space = await this.spaceRepository.findSpace(params.spaceId)

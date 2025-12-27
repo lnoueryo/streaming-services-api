@@ -102,11 +102,7 @@ export class EnableEntryUseCase {
             )
           }
           if (error.code === 'participant-already-exists') {
-            return this.error(
-              'conflict',
-              error.message,
-              error.code
-            )
+            return this.error('conflict', error.message, error.code)
           }
           if (error.type === 'not-found') {
             return this.success({
