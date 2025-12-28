@@ -9,10 +9,11 @@ export class GenerateTurnCredentialUseCase {
 
   do(userId: string): UseCaseResult<GenerateTurnCredentialDto, 'internal'> {
     try {
-      const ttl = config.ttl
+      const ttl = config.turnServer.ttl
       const timestamp = Math.floor(Date.now() / 1000) + ttl
+      const urls = config.turnServer.urls
       const username = `${timestamp}:${userId}`
-      const hmac = createHmac('sha1', config.turnServerSecret)
+      const hmac = createHmac('sha1', config.turnServer.secret)
       hmac.update(username)
       const password = hmac.digest('base64')
 
@@ -21,11 +22,7 @@ export class GenerateTurnCredentialUseCase {
           username,
           credential: password,
           ttl,
-          urls: [
-            'turn:turn.jounetsism.biz:3478?transport=udp',
-            'turn:turn.jounetsism.biz:3478?transport=tcp',
-            'turns:turn.jounetsism.biz:5349?transport=tcp'
-          ]
+          urls,
         })
       }
     } catch (error) {
