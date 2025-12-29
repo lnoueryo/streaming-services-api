@@ -7,13 +7,7 @@ import { RequestEntryUseCase } from 'src/application/usecases/space-member/reque
 import { DecideRequestRequest } from './request/decide-request.request'
 import { DecideRequestUseCase } from 'src/application/usecases/space-member/decide-request.usecase'
 import { DecideRequestResponse } from './response/decide-request.response'
-import { GrpcMethod, RpcException } from '@nestjs/microservices'
-import {
-  GetTargetSpaceMemberRequest,
-  GetTargetSpaceMemberResponse
-} from 'src/proto/application'
 import { GetTargetSpaceMemberUseCase } from 'src/application/usecases/space-member/get-target-space-member.usecase'
-import { getGrpcStatus } from '../shared/grpc-status-mapper'
 import { RequestEntryResponse } from './response/request-entry.response'
 import { GetSpaceMemberResponse } from './response/get-space-members.response'
 import { GetSpaceMemberUseCase } from 'src/application/usecases/space-member/get-space-member.usecase'
@@ -92,22 +86,5 @@ export class SpaceMemberController {
       throw new HttpErrorCodeException(result.error)
     }
     return new DecideRequestResponse(result.success)
-  }
-
-  @GrpcMethod('SpaceService', 'GetTargetSpaceMember')
-  async getSpaceMember(
-    data: GetTargetSpaceMemberRequest
-  ): Promise<GetTargetSpaceMemberResponse> {
-    const result = await this.getTargetSpaceMemberUseCase.do({
-      spaceId: data.spaceId,
-      userId: data.userId
-    })
-    if ('error' in result) {
-      throw new RpcException({
-        message: result.error.message,
-        code: getGrpcStatus(result.error.type)
-      })
-    }
-    return result.success
   }
 }

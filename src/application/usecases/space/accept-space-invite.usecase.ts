@@ -5,8 +5,8 @@ import { InviteSpaceService } from 'src/domain/services/space/invite-space.servi
 import { ISpaceMemberRepository } from 'src/application/ports/repositories/space-member.repository'
 import { Space } from 'src/domain/entities/space.entity'
 import { DomainError } from 'src/domain/errors/domain-error'
-import { ISignalingGateway } from 'src/application/ports/gateways/signaling.gateway'
-import { SpaceMember } from 'src/domain/entities/space-member.entity'
+import { IMediaGateway } from 'src/application/ports/gateways/media.gateway'
+import { PrismaService } from 'src/infrastructure/plugins/prisma'
 
 type AcceptSpaceInviteUseCaseResult = {
   redirect: string
@@ -27,8 +27,9 @@ export class AcceptSpaceInviteUseCase {
     private readonly spaceMemberRepository: ISpaceMemberRepository,
     @Inject(InviteSpaceService)
     private readonly inviteSpaceService: InviteSpaceService,
-    @Inject(ISignalingGateway)
-    private readonly signalingGateway: ISignalingGateway
+    @Inject(IMediaGateway)
+    private readonly mediaGateway: IMediaGateway,
+    private readonly prisma: PrismaService
   ) {}
 
   async do(params: {
@@ -50,10 +51,24 @@ export class AcceptSpaceInviteUseCase {
           params.user.email
         )
         if (spaceMember) {
-          await this.spaceMemberRepository.upsert(spaceMember)
-          await this.signalingGateway.acceptInvitation({
-            spaceId: space.id,
-            spaceMember
+          await this.prisma.$transaction(async (tx) => {
+            const spaceMemberRepository =
+              this.spaceMemberRepository.transaction(tx)
+            await spaceMemberRepository.upsert(spaceMember)
+            try {
+              await this.mediaGateway.changeMemberState({
+                spaceId: space.id,
+                spaceMember
+              })
+            } catch (error) {
+              if (error instanceof DomainError === false) {
+                throw error
+              }
+              if (error.type !== 'not-found') {
+                throw error
+              }
+              // not-foundならまだ誰も参加していないだけなのでスルー
+            }
           })
         }
         return this.success(space)
@@ -63,10 +78,23 @@ export class AcceptSpaceInviteUseCase {
           params.user.email
         )
         if (spaceMember) {
-          await this.spaceMemberRepository.upsert(spaceMember)
-          await this.signalingGateway.acceptInvitation({
-            spaceId: space.id,
-            spaceMember
+          await this.prisma.$transaction(async (tx) => {
+            const spaceMemberRepository =
+              this.spaceMemberRepository.transaction(tx)
+            await spaceMemberRepository.upsert(spaceMember)
+            try {
+              await this.mediaGateway.changeMemberState({
+                spaceId: space.id,
+                spaceMember
+              })
+            } catch (error) {
+              if (error instanceof DomainError === false) {
+                throw error
+              }
+              if (error.type !== 'not-found') {
+                throw error
+              }
+            }
           })
         }
         return this.success(space)

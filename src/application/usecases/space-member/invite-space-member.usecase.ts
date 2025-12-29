@@ -1,4 +1,5 @@
 import { Inject, Injectable, Logger } from '@nestjs/common'
+import { IMediaGateway } from 'src/application/ports/gateways/media.gateway'
 import { ISpaceMemberRepository } from 'src/application/ports/repositories/space-member.repository'
 import { UseCaseResult } from 'src/application/ports/usecases/usecase-result'
 import { SpaceMember } from 'src/domain/entities/space-member.entity'
@@ -11,7 +12,9 @@ export class InviteSpaceMemberUseCase {
   constructor(
     @Inject(ISpaceMemberRepository)
     private readonly spaceMemberRepository: ISpaceMemberRepository,
-    private readonly prisma: PrismaService
+    private readonly prisma: PrismaService,
+    @Inject(IMediaGateway)
+    private readonly mediaGateway: IMediaGateway
   ) {}
   async do(input: {
     spaceId: string
@@ -50,6 +53,17 @@ export class InviteSpaceMemberUseCase {
           .transaction(tx)
           .createMany(spaceMembers)
       })
+      const changeMemberStatePromise = spaceMembers.map((spaceMember) => {
+        return this.mediaGateway.changeMemberState({
+          spaceId: input.spaceId,
+          spaceMember: spaceMember
+        })
+      })
+      try {
+        await Promise.all(changeMemberStatePromise)
+      } catch (error) {
+        Logger.warn(error)
+      }
       return {
         success: spaceMembers.map((member) => ({
           id: member.id,

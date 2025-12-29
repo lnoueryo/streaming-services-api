@@ -2,11 +2,12 @@ import { Inject, Injectable, Logger } from '@nestjs/common'
 import { UseCaseResult } from 'src/application/ports/usecases/usecase-result'
 import { ISpaceMemberRepository } from 'src/application/ports/repositories/space-member.repository'
 import { DomainError } from 'src/domain/errors/domain-error'
-import { ISignalingGateway } from 'src/application/ports/gateways/signaling.gateway'
+import { IMediaGateway } from 'src/application/ports/gateways/media.gateway'
 import {
   MemberRole,
   MemberStatus
 } from 'src/domain/entities/space-member.entity'
+import { PrismaService } from 'src/infrastructure/plugins/prisma'
 
 type ErrorType = 'forbidden' | 'conflict' | 'internal'
 
@@ -15,8 +16,9 @@ export class RequestEntryUseCase {
   constructor(
     @Inject(ISpaceMemberRepository)
     private readonly spaceMemberRepository: ISpaceMemberRepository,
-    @Inject(ISignalingGateway)
-    private readonly signalingGateway: ISignalingGateway
+    @Inject(IMediaGateway)
+    private readonly mediaGateway: IMediaGateway,
+    private readonly prisma: PrismaService
   ) {}
   async do(input: {
     spaceId: string
@@ -53,13 +55,27 @@ export class RequestEntryUseCase {
           throw error
         }
       }
-      const updatedSpaceMember =
-        await this.spaceMemberRepository.update(spaceMember)
-
-      await this.signalingGateway.requestEntry({
-        spaceId: input.spaceId,
-        spaceMember: updatedSpaceMember
+      const updatedSpaceMember = await this.prisma.$transaction(async (tx) => {
+        const spaceMemberRepository = this.spaceMemberRepository.transaction(tx)
+        const updatedSpaceMember =
+          await spaceMemberRepository.update(spaceMember)
+        try {
+          await this.mediaGateway.changeMemberState({
+            spaceId: input.spaceId,
+            spaceMember: updatedSpaceMember
+          })
+        } catch (error) {
+          if (error instanceof DomainError === false) {
+            throw error
+          }
+          if (error.type !== 'not-found') {
+            throw error
+          }
+          // not-foundならまだ誰も参加していないだけなのでスルー
+        }
+        return updatedSpaceMember
       })
+
       return {
         success: {
           role: updatedSpaceMember.role,

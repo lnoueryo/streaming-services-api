@@ -1,4 +1,3 @@
-import { GetPublicSpaceDto } from 'src/application/usecases/space/dto/get-public-space.dto'
 import { GetTargetSpaceResponse } from './get-target-space.response'
 
 export class GetPublicSpaceResponse {
@@ -8,7 +7,26 @@ export class GetPublicSpaceResponse {
   total: number
   totalPages: number
 
-  constructor(params: GetPublicSpaceDto) {
+  constructor(params: {
+    spaces: {
+      id: string
+      name?: string
+      privacy: string
+      creatorId: string
+      spaceMembers: {
+        id: string
+        spaceId: string
+        userId?: string
+        email: string
+        role: string
+        status: string
+      }[]
+    }[]
+    page: number
+    limit: number
+    total: number
+    totalPages: number
+  }) {
     this.items = params.spaces.map((s) => new GetTargetSpaceResponse(s))
     this.page = params.page
     this.limit = params.limit

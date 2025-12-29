@@ -1,7 +1,7 @@
 import { Inject, Injectable, Logger } from '@nestjs/common'
 import { ISpaceRepository } from 'src/application/ports/repositories/space.repository'
 import { UseCaseResult } from 'src/application/ports/usecases/usecase-result'
-import { ISignalingGateway } from 'src/application/ports/gateways/signaling.gateway'
+import { IMediaGateway } from 'src/application/ports/gateways/media.gateway'
 import { GetRoomDto } from './dto/get-room.dto'
 import { DomainError } from 'src/domain/errors/domain-error'
 import { Space } from 'src/domain/entities/space.entity'
@@ -16,15 +16,15 @@ export class EnterLobbyUseCase {
   constructor(
     @Inject(ISpaceRepository)
     private readonly spaceRepository: ISpaceRepository,
-    @Inject(ISignalingGateway)
-    private readonly signalingGateway: ISignalingGateway,
+    @Inject(IMediaGateway)
+    private readonly mediaGateway: IMediaGateway,
     @Inject(InviteSpaceService)
     private readonly inviteSpaceService: InviteSpaceService
   ) {}
 
   async do(params: {
     spaceId: string
-    user: { id: string; email: string; token: string }
+    user: { id: string; email: string }
   }): Promise<UseCaseResult<GetRoomDto, ErrorType>> {
     try {
       const space = await this.spaceRepository.findSpace(params.spaceId)
@@ -36,7 +36,7 @@ export class EnterLobbyUseCase {
         ? this.inviteSpaceService.generate(space)
         : undefined
       try {
-        const room = await this.signalingGateway.getRoom(params)
+        const room = await this.mediaGateway.getRoom(params)
         return this.success({
           space,
           spaceMember,

@@ -16,11 +16,15 @@ import { SpaceMemberRepository } from 'src/infrastructure/repositories/space-mem
 import { AxiosFactory } from 'src/infrastructure/plugins/axios'
 import { JwtFactory } from 'src/infrastructure/plugins/jwt'
 import { GrpcClientFactory } from 'src/infrastructure/plugins/micro-services'
+import { IMediaGateway } from 'src/application/ports/gateways/media.gateway'
+import { MediaGateway } from 'src/infrastructure/gateways/grpc/media.gateway'
+import { GetTargetSpaceUseCase } from 'src/application/usecases/space/get-target-space.usecase'
 
 @Module({
   controllers: [SpaceController],
   providers: [
     CreateSpaceUseCase,
+    GetTargetSpaceUseCase,
     AcceptSpaceInviteUseCase,
     GetPublicSpaceUseCase,
     EnterLobbyUseCase,
@@ -41,8 +45,12 @@ import { GrpcClientFactory } from 'src/infrastructure/plugins/micro-services'
     {
       provide: ISignalingGateway,
       useClass: SignalingGateway
+    },
+    {
+      provide: IMediaGateway,
+      useClass: MediaGateway
     }
   ],
-  exports: [ISpaceRepository, ISignalingGateway]
+  exports: [ISpaceRepository, ISignalingGateway, IMediaGateway]
 })
 export class SpaceModule {}

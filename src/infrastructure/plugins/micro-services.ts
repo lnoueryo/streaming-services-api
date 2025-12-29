@@ -98,6 +98,12 @@ export class GrpcClientFactory {
           code: String(errorCode) || undefined,
           message: error.details
         })
+      case status.ALREADY_EXISTS:
+        return new DomainError({
+          type: 'conflict',
+          code: String(errorCode) || undefined,
+          message: error.details
+        })
       default:
         return new DomainError({
           type: 'internal',
