@@ -75,6 +75,7 @@ const configEnvs: { [K in STAGE]: ConfigEnv } = {
   staging: {
     allowOrigin: 'https://streaming.staging.biz:8443',
     signalingApiOrigin: 'streaming-signaling-stg:50051',
+    mediaApiOrigin: 'streaming-media-stg:50051',
     turnServer: {
       secret: turnServerSecret,
       ttl: Number(process.env.TURN_SERVER_TTL || 750),
@@ -95,8 +96,8 @@ const configEnvs: { [K in STAGE]: ConfigEnv } = {
   },
   production: {
     allowOrigin: 'https://streaming.jounetsism.biz',
-    signalingApiOrigin: 'streaming-signaling:50051',
-    mediaApiOrigin: 'streaming-media:50051',
+    signalingApiOrigin: 'streaming-signaling-prod:50051',
+    mediaApiOrigin: 'streaming-media-prod:50051',
     turnServer: {
       secret: turnServerSecret,
       ttl: Number(process.env.TURN_SERVER_TTL || 750),
