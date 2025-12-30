@@ -16,4 +16,5 @@ export interface ISpaceRepository extends IRepository<ISpaceRepository> {
   findSpace(id: string): Promise<Space | null>
   countSpaces(params: SpaceWhere): Promise<number>
   create(params: Space): Promise<Space>
+  update(params: Space): Promise<Space>
 }

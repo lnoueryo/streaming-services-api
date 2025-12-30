@@ -131,6 +131,7 @@ export class Space extends BaseEntity {
       status: SpaceMember.initialStatus(memberParams.role)
     })
     this.spaceMembers.push(newMember)
+    return newMember
   }
   assignOwner(ownerParams: { userId: string; email: string }) {
     const owner = new SpaceMember({
@@ -184,5 +185,10 @@ export class Space extends BaseEntity {
       })
     }
     return spaceMember
+  }
+  get creator(): SpaceMember {
+    return this.spaceMembers.find(
+      (member) => member!.userId === this.creatorId
+    )!
   }
 }

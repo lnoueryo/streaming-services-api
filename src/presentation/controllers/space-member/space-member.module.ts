@@ -12,7 +12,6 @@ import { GrpcClientFactory } from 'src/infrastructure/plugins/micro-services'
 import { JwtFactory } from 'src/infrastructure/plugins/jwt'
 import { GetTargetSpaceMemberUseCase } from 'src/application/usecases/space-member/get-target-space-member.usecase'
 import { GetSpaceMemberUseCase } from 'src/application/usecases/space-member/get-space-member.usecase'
-import { InviteSpaceMemberUseCase } from 'src/application/usecases/space-member/invite-space-member.usecase'
 import { MediaGateway } from 'src/infrastructure/gateways/grpc/media.gateway'
 import { IMediaGateway } from 'src/application/ports/gateways/media.gateway'
 
@@ -23,7 +22,6 @@ import { IMediaGateway } from 'src/application/ports/gateways/media.gateway'
     DecideRequestUseCase,
     GetSpaceMemberUseCase,
     GetTargetSpaceMemberUseCase,
-    InviteSpaceMemberUseCase,
     EntryRequestDecisionService,
     GrpcClientFactory,
     JwtFactory,

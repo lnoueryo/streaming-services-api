@@ -68,6 +68,38 @@ export class SpaceRepository implements ISpaceRepository {
     })
     return new Space(space)
   }
+  async update(params: Space): Promise<Space> {
+    const space = await this.prisma.space.update({
+      where: { id: params.id },
+      data: {
+        name: params.name || null,
+        privacy: params.privacy,
+        creatorId: params.creatorId,
+        spaceMembers: {
+          upsert: params.spaceMembers.map((member) => ({
+            where: {
+              spaceId_email: {
+                spaceId: params.id,
+                email: member.email,
+              },
+            },
+            create: {
+              id: member.id,
+              userId: member.userId,
+              email: member.email,
+              role: member.role,
+              status: member.status,
+            },
+            update: {
+              role: member.role,
+              status: member.status,
+            },
+          })),
+        },
+      },
+    })
+    return new Space(space)
+  }
   transaction(tx: any) {
     return new SpaceRepository(tx)
   }

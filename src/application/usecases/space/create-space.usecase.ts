@@ -5,6 +5,8 @@ import { auth } from 'src/infrastructure/plugins/firebase-admin'
 import { InviteSpaceService } from 'src/domain/services/space/invite-space.service'
 import { Space, SpacePrivacy } from 'src/domain/entities/space.entity'
 import { MemberRole } from 'src/domain/entities/space-member.entity'
+import { IEmailService } from 'src/application/ports/services/email.service'
+import { PrismaService } from 'src/infrastructure/plugins/prisma'
 
 type Member = {
   email: string
@@ -17,7 +19,10 @@ export class CreateSpaceUseCase {
     @Inject(ISpaceRepository)
     private readonly spaceRepository: ISpaceRepository,
     @Inject(InviteSpaceService)
-    private readonly inviteSpaceService: InviteSpaceService
+    private readonly inviteSpaceService: InviteSpaceService,
+    @Inject(IEmailService)
+    private readonly emailService: IEmailService,
+    private readonly prisma: PrismaService
   ) {}
   async do(params: {
     user: { id: string; email: string }
@@ -96,15 +101,23 @@ export class CreateSpaceUseCase {
         }
       }
 
-      const createdSpace = await this.spaceRepository.create(space)
-      const token = this.inviteSpaceService.generate(createdSpace)
+      await this.prisma.$transaction(async (tx) => {
+        const spaceRepo = this.spaceRepository.transaction(tx)
+        await spaceRepo.create(space)
+        const invitation = this.inviteSpaceService.createInvitation(space)
+        const result = await this.emailService.sendMail(invitation)
+        if (result.status !== 'success') {
+          throw result
+        }
+      })
+      const token = this.inviteSpaceService.generate(space)
       return {
         success: {
           space: {
-            id: createdSpace.id,
-            name: createdSpace.name || undefined,
-            privacy: createdSpace.privacy,
-            creatorId: createdSpace.creatorId
+            id: space.id,
+            name: space.name || undefined,
+            privacy: space.privacy,
+            creatorId: space.creatorId
           },
           url: `/space/invite/${token}`
         }
