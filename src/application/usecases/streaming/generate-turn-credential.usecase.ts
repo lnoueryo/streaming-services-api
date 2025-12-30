@@ -22,7 +22,7 @@ export class GenerateTurnCredentialUseCase {
           username,
           credential: password,
           ttl,
-          urls,
+          urls
         })
       }
     } catch (error) {

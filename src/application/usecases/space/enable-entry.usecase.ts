@@ -11,6 +11,8 @@ import { SpaceMember } from 'src/domain/entities/space-member.entity'
 import { InviteSpaceService } from 'src/domain/services/space/invite-space.service'
 import { IMediaGateway } from 'src/application/ports/gateways/media.gateway'
 import { PrismaService } from 'src/infrastructure/plugins/prisma'
+import { SpaceUser } from 'src/domain/entities/space-user.entity'
+import { auth } from 'src/infrastructure/plugins/firebase-admin'
 
 type EnableEntryUseCaseResult = {
   id: string
@@ -65,9 +67,21 @@ export class EnableEntryUseCase {
           const spaceMemberRepository =
             this.spaceMemberRepository.transaction(tx)
           await spaceMemberRepository.update(spaceMember)
+          const firebaseUser = await auth.getUserByEmail(spaceMember.email)
+          const spaceUser = new SpaceUser({
+            id: spaceMember.id,
+            name: firebaseUser.displayName || undefined,
+            image: firebaseUser.photoURL || undefined,
+            spaceId: spaceMember.spaceId,
+            userId: spaceMember.userId || undefined,
+            email: spaceMember.email!,
+            role: spaceMember.role,
+            status: spaceMember.status,
+            joinedAt: spaceMember.joinedAt || undefined
+          })
           return await this.mediaGateway.createPeer({
             spaceId: space.id,
-            spaceMember,
+            spaceUser,
             user: params.user
           })
         })

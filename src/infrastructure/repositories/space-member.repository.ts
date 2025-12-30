@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common'
+import { Prisma } from '@prisma/client'
 import { ISpaceMemberRepository } from 'src/application/ports/repositories/space-member.repository'
 import { SpaceMember } from 'src/domain/entities/space-member.entity'
 import { PrismaService } from 'src/infrastructure/plugins/prisma'
@@ -116,6 +117,36 @@ export class SpaceMemberRepository implements ISpaceMemberRepository {
       }
     })
     return new SpaceMember(spaceMember)
+  }
+  async upsertMany(params: SpaceMember[]): Promise<SpaceMember[]> {
+    // Prismaにちょうどいい感じのupsertManyがないのでraw queryで実装
+    await this.prisma.$executeRaw`
+      INSERT INTO SpaceMember (
+        id,
+        spaceId,
+        userId,
+        email,
+        role,
+        status
+      )
+      VALUES
+      ${Prisma.join(
+        params.map(
+          (m) => Prisma.sql`(
+            ${m.id},
+            ${m.spaceId},
+            ${m.userId},
+            ${m.email},
+            ${m.role},
+            ${m.status}
+          )`
+        )
+      )}
+      ON DUPLICATE KEY UPDATE
+        role = VALUES(role),
+        status = VALUES(status)
+    `
+    return params
   }
   transaction(tx: PrismaService) {
     return new SpaceMemberRepository(tx)

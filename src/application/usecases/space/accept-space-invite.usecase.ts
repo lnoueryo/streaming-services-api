@@ -7,6 +7,8 @@ import { Space } from 'src/domain/entities/space.entity'
 import { DomainError } from 'src/domain/errors/domain-error'
 import { IMediaGateway } from 'src/application/ports/gateways/media.gateway'
 import { PrismaService } from 'src/infrastructure/plugins/prisma'
+import { SpaceUser } from 'src/domain/entities/space-user.entity'
+import { auth } from 'src/infrastructure/plugins/firebase-admin'
 
 type AcceptSpaceInviteUseCaseResult = {
   redirect: string
@@ -55,10 +57,22 @@ export class AcceptSpaceInviteUseCase {
             const spaceMemberRepository =
               this.spaceMemberRepository.transaction(tx)
             await spaceMemberRepository.upsert(spaceMember)
+            const firebaseUser = await auth.getUserByEmail(spaceMember.email)
+            const spaceUser = new SpaceUser({
+              id: spaceMember.id,
+              name: firebaseUser.displayName || undefined,
+              image: firebaseUser.photoURL || undefined,
+              spaceId: spaceMember.spaceId,
+              userId: spaceMember.userId || undefined,
+              email: spaceMember.email!,
+              role: spaceMember.role,
+              status: spaceMember.status,
+              joinedAt: spaceMember.joinedAt || undefined
+            })
             try {
               await this.mediaGateway.changeMemberState({
                 spaceId: space.id,
-                spaceMember
+                spaceUser
               })
             } catch (error) {
               if (error instanceof DomainError === false) {
@@ -82,10 +96,22 @@ export class AcceptSpaceInviteUseCase {
             const spaceMemberRepository =
               this.spaceMemberRepository.transaction(tx)
             await spaceMemberRepository.upsert(spaceMember)
+            const firebaseUser = await auth.getUserByEmail(spaceMember.email)
+            const spaceUser = new SpaceUser({
+              id: spaceMember.id,
+              name: firebaseUser.displayName || undefined,
+              image: firebaseUser.photoURL || undefined,
+              spaceId: spaceMember.spaceId,
+              userId: spaceMember.userId || undefined,
+              email: spaceMember.email!,
+              role: spaceMember.role,
+              status: spaceMember.status,
+              joinedAt: spaceMember.joinedAt || undefined
+            })
             try {
               await this.mediaGateway.changeMemberState({
                 spaceId: space.id,
-                spaceMember
+                spaceUser
               })
             } catch (error) {
               if (error instanceof DomainError === false) {

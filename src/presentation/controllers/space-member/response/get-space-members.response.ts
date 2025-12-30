@@ -4,6 +4,8 @@ export class GetSpaceMemberResponse {
   constructor(
     params: {
       id: string
+      name?: string
+      image?: string
       spaceId: string
       userId?: string
       email: string

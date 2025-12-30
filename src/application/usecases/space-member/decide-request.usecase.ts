@@ -4,7 +4,9 @@ import { IMediaGateway } from 'src/application/ports/gateways/media.gateway'
 import { ISignalingGateway } from 'src/application/ports/gateways/signaling.gateway'
 import { ISpaceMemberRepository } from 'src/application/ports/repositories/space-member.repository'
 import { UseCaseResult } from 'src/application/ports/usecases/usecase-result'
+import { SpaceUser } from 'src/domain/entities/space-user.entity'
 import { EntryRequestDecisionService } from 'src/domain/services/space-member/entry-request-decision.service'
+import { auth } from 'src/infrastructure/plugins/firebase-admin'
 
 type ErrorType = 'forbidden' | 'not-found' | 'internal'
 
@@ -63,12 +65,24 @@ export class DecideRequestUseCase {
         decision: input.body.status
       })
       const updatedMember = await this.spaceMemberRepository.update(spaceMember)
+      const firebaseUser = await auth.getUserByEmail(updatedMember.email)
+      const spaceUser = new SpaceUser({
+        id: updatedMember.id!,
+        name: firebaseUser.displayName || undefined,
+        image: firebaseUser.photoURL || undefined,
+        spaceId: updatedMember.spaceId,
+        userId: updatedMember.userId || undefined,
+        email: updatedMember.email!,
+        role: updatedMember.role,
+        status: updatedMember.status,
+        joinedAt: updatedMember.joinedAt || undefined
+      })
       try {
         await Promise.all([
           this.signalingGateway.decideRequest(updatedMember),
           this.mediaGateway.changeMemberState({
             spaceId: input.params.spaceId,
-            spaceMember: updatedMember
+            spaceUser
           })
         ])
       } catch (error) {

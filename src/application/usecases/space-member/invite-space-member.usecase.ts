@@ -3,8 +3,10 @@ import { IMediaGateway } from 'src/application/ports/gateways/media.gateway'
 import { ISpaceMemberRepository } from 'src/application/ports/repositories/space-member.repository'
 import { UseCaseResult } from 'src/application/ports/usecases/usecase-result'
 import { SpaceMember } from 'src/domain/entities/space-member.entity'
+import { SpaceUser } from 'src/domain/entities/space-user.entity'
+import { auth } from 'src/infrastructure/plugins/firebase-admin'
 import { PrismaService } from 'src/infrastructure/plugins/prisma'
-import { SpaceMemberRepository } from 'src/infrastructure/repositories/space-member.repository'
+
 type ErrorType = 'forbidden' | 'not-found' | 'internal'
 
 @Injectable()
@@ -24,10 +26,14 @@ export class InviteSpaceMemberUseCase {
     UseCaseResult<
       {
         id: string
+        name?: string
+        image?: string
         spaceId: string
+        userId?: string
         email: string
         role: SpaceMember['role']
         status: SpaceMember['status']
+        joinedAt?: Date
       }[],
       ErrorType
     >
@@ -49,14 +55,33 @@ export class InviteSpaceMemberUseCase {
         })
       })
       await this.prisma.$transaction(async (tx) => {
-        await this.spaceMemberRepository
-          .transaction(tx)
-          .createMany(spaceMembers)
+        const spaceMemberRepo = this.spaceMemberRepository.transaction(tx)
+        return await spaceMemberRepo.upsertMany(spaceMembers)
       })
-      const changeMemberStatePromise = spaceMembers.map((spaceMember) => {
+      const firebaseUsers = await auth.getUsers(
+        spaceMembers.map((member) => ({ email: member.email }))
+      )
+      const userMap = new Map(
+        firebaseUsers.users.map((user) => [user.email, user])
+      )
+      const spaceUsers = spaceMembers.map((spaceMember) => {
+        const firebaseUser = userMap.get(spaceMember.email)
+        return new SpaceUser({
+          id: spaceMember.id,
+          name: firebaseUser?.displayName || undefined,
+          image: firebaseUser?.photoURL || undefined,
+          spaceId: spaceMember.spaceId,
+          userId: spaceMember.userId || undefined,
+          email: spaceMember.email!,
+          role: spaceMember.role,
+          status: spaceMember.status,
+          joinedAt: spaceMember.joinedAt || undefined
+        })
+      })
+      const changeMemberStatePromise = spaceUsers.map((spaceUser) => {
         return this.mediaGateway.changeMemberState({
           spaceId: input.spaceId,
-          spaceMember: spaceMember
+          spaceUser: spaceUser
         })
       })
       try {
@@ -65,12 +90,16 @@ export class InviteSpaceMemberUseCase {
         Logger.warn(error)
       }
       return {
-        success: spaceMembers.map((member) => ({
-          id: member.id,
-          spaceId: member.spaceId,
-          email: member.email,
-          role: member.role,
-          status: member.status
+        success: spaceUsers.map((spaceUser) => ({
+          id: spaceUser.id,
+          name: spaceUser.name,
+          image: spaceUser.image,
+          spaceId: spaceUser.spaceId,
+          userId: spaceUser.userId,
+          email: spaceUser.email,
+          role: spaceUser.role,
+          status: spaceUser.status,
+          joinedAt: spaceUser.joinedAt
         }))
       }
     } catch (error) {

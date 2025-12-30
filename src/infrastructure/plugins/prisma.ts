@@ -38,8 +38,30 @@ export class PrismaService
     Omit<
       PrismaClient,
       '$connect' | '$disconnect' | '$on' | '$transaction' | '$extends'
-    > {}
-
-// export type IPrismaClient = Omit<PrismaClient, "$connect" | "$disconnect" | "$on" | "$transaction" | "$extends">
+    >
+{
+  constructor() {
+    super({
+      log: [
+        {
+          emit: 'stdout',
+          level: 'query'
+        },
+        {
+          emit: 'stdout',
+          level: 'error'
+        },
+        {
+          emit: 'stdout',
+          level: 'info'
+        },
+        {
+          emit: 'stdout',
+          level: 'warn'
+        }
+      ]
+    })
+  }
+}
 
 export type IPrismaClient = PrismaService | Prisma.TransactionClient

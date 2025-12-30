@@ -1,5 +1,5 @@
 import { Room } from 'src/domain/entities/room.entity'
-import { SpaceMember } from 'src/domain/entities/space-member.entity'
+import { SpaceUser } from 'src/domain/entities/space-user.entity'
 
 export const IMediaGateway = Symbol('IMediaGateway')
 
@@ -11,11 +11,11 @@ export type IMediaGateway = {
   }) => Promise<Room>
   changeMemberState: (params: {
     spaceId: string
-    spaceMember: SpaceMember
+    spaceUser: SpaceUser
   }) => Promise<void>
   createPeer: (params: {
     spaceId: string
-    spaceMember: SpaceMember
+    spaceUser: SpaceUser
     user: { id: string; name: string; email: string; image: string }
   }) => Promise<Room>
 }

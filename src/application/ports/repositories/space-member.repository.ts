@@ -21,4 +21,5 @@ export interface ISpaceMemberRepository
   createMany(params: SpaceMember[]): Promise<void>
   update(params: SpaceMember): Promise<SpaceMember>
   upsert(params: SpaceMember): Promise<SpaceMember>
+  upsertMany(params: SpaceMember[]): Promise<SpaceMember[]>
 }
