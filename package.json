@@ -40,6 +40,7 @@
     "dotenv": "^17.2.3",
     "firebase-admin": "^13.6.0",
     "grpc": "^1.24.11",
+    "node-mailjet": "^6.0.11",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",
     "uuid": "^13.0.0"

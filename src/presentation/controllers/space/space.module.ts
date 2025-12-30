@@ -19,6 +19,10 @@ import { GrpcClientFactory } from 'src/infrastructure/plugins/micro-services'
 import { IMediaGateway } from 'src/application/ports/gateways/media.gateway'
 import { MediaGateway } from 'src/infrastructure/gateways/grpc/media.gateway'
 import { GetTargetSpaceUseCase } from 'src/application/usecases/space/get-target-space.usecase'
+import { MailjetService } from 'src/infrastructure/services/email/mailjet.service'
+import { MailjetFactory } from 'src/infrastructure/plugins/mailjet'
+import { IEmailService } from 'src/application/ports/services/email.service'
+import { InviteSpaceUseCase } from 'src/application/usecases/space/invite-space.usecase'
 
 @Module({
   controllers: [SpaceController],
@@ -29,11 +33,14 @@ import { GetTargetSpaceUseCase } from 'src/application/usecases/space/get-target
     GetPublicSpaceUseCase,
     EnterLobbyUseCase,
     EnableEntryUseCase,
+    InviteSpaceUseCase,
     AxiosFactory,
+    MailjetFactory,
     PrismaService,
     JwtFactory,
     GrpcClientFactory,
     InviteSpaceService,
+    MailjetService,
     {
       provide: ISpaceRepository,
       useClass: SpaceRepository
@@ -49,6 +56,10 @@ import { GetTargetSpaceUseCase } from 'src/application/usecases/space/get-target
     {
       provide: IMediaGateway,
       useClass: MediaGateway
+    },
+    {
+      provide: IEmailService,
+      useClass: MailjetService
     }
   ],
   exports: [ISpaceRepository, ISignalingGateway, IMediaGateway]

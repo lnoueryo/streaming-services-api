@@ -11,6 +11,14 @@ type Config = {
     }
     secret: string
   }
+  mailjet: {
+    apiKeyPublic: string
+    apiKeyPrivate: string
+    from: {
+      email: string
+      name: string
+    },
+  }
 }
 
 if (!process.env.APP_SECRET) {
@@ -24,6 +32,10 @@ if (!turnServerSecret) {
 if (!process.env.SIGNALING_SERVER_SECRET) {
   throw new Error('invalid signaling server secret')
 }
+
+if (!process.env.MJ_APIKEY_PUBLIC || !process.env.MJ_APIKEY_PRIVATE) {
+  throw new Error('invalid mailjet api keys')
+}
 const config: Config = {
   appSecret: process.env.APP_SECRET,
   signalingAuthJwt: {
@@ -34,6 +46,14 @@ const config: Config = {
       expiresIn: 60 // 60 seconds
     },
     secret: process.env.SIGNALING_SERVER_SECRET
+  },
+  mailjet: {
+    apiKeyPublic: process.env.MJ_APIKEY_PUBLIC || '',
+    apiKeyPrivate: process.env.MJ_APIKEY_PRIVATE || '',
+    from: {
+      email: 'support@jounetsism.biz',
+      name: 'Space サポートチーム'
+    }
   }
 }
 
