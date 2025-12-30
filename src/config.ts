@@ -42,10 +42,10 @@ type ConfigEnv = {
   signalingApiOrigin: string
   mediaApiOrigin: string
   turnServer: {
-    secret: string,
-    ttl: number,
+    secret: string
+    ttl: number
     urls: string[]
-  },
+  }
   protoPath: {
     signaling: string
     media: string
@@ -67,9 +67,12 @@ const configEnvs: { [K in STAGE]: ConfigEnv } = {
       urls: []
     },
     protoPath: {
-      signaling: join(process.cwd(), 'src/proto/signaling.proto'),
+      signaling: join(process.cwd(), 'src/proto/signaling/signaling.proto'),
       media: join(process.cwd(), 'src/proto/media/media.proto'),
-      application: join(process.cwd(), 'src/proto/application.proto')
+      application: join(
+        process.cwd(),
+        'src/proto/application/application.proto'
+      )
     }
   },
   staging: {
@@ -82,7 +85,7 @@ const configEnvs: { [K in STAGE]: ConfigEnv } = {
       urls: [
         'turns:turn.staging.biz:8446?transport=tcp',
         'turns:turn.staging.biz:8445?transport=tcp',
-        'turn:turn.staging.biz:8445?transport=udp',
+        'turn:turn.staging.biz:8445?transport=udp'
       ]
     },
     protoPath: {
@@ -104,7 +107,7 @@ const configEnvs: { [K in STAGE]: ConfigEnv } = {
       urls: [
         'turns:turn.jounetsism.biz:5349?transport=tcp',
         'turn:turn.jounetsism.biz:3478?transport=udp',
-        'turn:turn.jounetsism.biz:3478?transport=tcp',
+        'turn:turn.jounetsism.biz:3478?transport=tcp'
       ]
     },
     protoPath: {

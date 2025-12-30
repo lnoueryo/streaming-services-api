@@ -8,6 +8,8 @@ import {
   MemberStatus
 } from 'src/domain/entities/space-member.entity'
 import { PrismaService } from 'src/infrastructure/plugins/prisma'
+import { auth } from 'src/infrastructure/plugins/firebase-admin'
+import { SpaceUser } from 'src/domain/entities/space-user.entity'
 
 type ErrorType = 'forbidden' | 'conflict' | 'internal'
 
@@ -59,10 +61,22 @@ export class RequestEntryUseCase {
         const spaceMemberRepository = this.spaceMemberRepository.transaction(tx)
         const updatedSpaceMember =
           await spaceMemberRepository.update(spaceMember)
+        const firebaseUser = await auth.getUserByEmail(updatedSpaceMember.email)
+        const spaceUser = new SpaceUser({
+          id: updatedSpaceMember.id!,
+          name: firebaseUser.displayName || undefined,
+          image: firebaseUser.photoURL || undefined,
+          spaceId: updatedSpaceMember.spaceId,
+          userId: updatedSpaceMember.userId || undefined,
+          email: updatedSpaceMember.email!,
+          role: updatedSpaceMember.role,
+          status: updatedSpaceMember.status,
+          joinedAt: updatedSpaceMember.joinedAt || undefined
+        })
         try {
           await this.mediaGateway.changeMemberState({
             spaceId: input.spaceId,
-            spaceMember: updatedSpaceMember
+            spaceUser
           })
         } catch (error) {
           if (error instanceof DomainError === false) {

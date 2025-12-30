@@ -20,8 +20,10 @@ export type IMediaService = {
   }>
   changeMemberState(params: {
     spaceId: string
-    spaceMember: {
+    spaceUser: {
       id: string
+      name?: string
+      image?: string
       spaceId: string
       userId?: string | null
       email: string
@@ -31,8 +33,10 @@ export type IMediaService = {
   }): Promise<void>
   createPeer(params: {
     spaceId: string
-    spaceMember: {
+    spaceUser: {
       id: string
+      name?: string
+      image?: string
       spaceId: string
       userId?: string | null
       email: string

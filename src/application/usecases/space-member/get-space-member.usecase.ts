@@ -2,6 +2,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common'
 import { SpaceMember } from '@prisma/client'
 import { ISpaceMemberRepository } from 'src/application/ports/repositories/space-member.repository'
 import { UseCaseResult } from 'src/application/ports/usecases/usecase-result'
+import { auth } from 'src/infrastructure/plugins/firebase-admin'
 
 type ErrorType = 'forbidden' | 'not-found' | 'internal'
 
@@ -15,6 +16,8 @@ export class GetSpaceMemberUseCase {
     UseCaseResult<
       {
         id: string
+        name?: string
+        image?: string
         spaceId: string
         userId?: string
         email: string
@@ -35,11 +38,19 @@ export class GetSpaceMemberUseCase {
       if (!spaceMember || !spaceMember.isOwner()) {
         return this.error('forbidden', '取得の権限がありません。')
       }
-
+      const firebaseUsers = await auth.getUsers(
+        spaceMembers.map((member) => ({ email: member.email }))
+      )
+      const userMap = new Map(
+        firebaseUsers.users.map((user) => [user.email, user])
+      )
       return {
         success: spaceMembers.map((spaceMember) => {
+          const firebaseUser = userMap.get(spaceMember.email)
           return {
             id: spaceMember.id,
+            name: firebaseUser?.displayName || undefined,
+            image: firebaseUser?.photoURL || undefined,
             spaceId: spaceMember.spaceId,
             userId: spaceMember.userId || undefined,
             email: spaceMember.email!,

@@ -5,6 +5,7 @@ import { config } from 'src/config'
 import { IMediaService } from 'src/application/ports/grpc/media.grpc'
 import { SpaceMember } from 'src/domain/entities/space-member.entity'
 import { Room } from 'src/domain/entities/room.entity'
+import { SpaceUser } from 'src/domain/entities/space-user.entity'
 
 @Injectable()
 export class MediaGateway implements IMediaGateway {
@@ -38,17 +39,19 @@ export class MediaGateway implements IMediaGateway {
 
   async changeMemberState(params: {
     spaceId: string
-    spaceMember: SpaceMember
+    spaceUser: SpaceUser
   }): Promise<void> {
     await this.mediaService.changeMemberState({
       spaceId: params.spaceId,
-      spaceMember: {
-        id: params.spaceMember.id,
-        spaceId: params.spaceMember.spaceId,
-        userId: params.spaceMember.userId,
-        email: params.spaceMember.email,
-        role: params.spaceMember.role,
-        status: params.spaceMember.status
+      spaceUser: {
+        id: params.spaceUser.id,
+        name: params.spaceUser.name,
+        image: params.spaceUser.image,
+        spaceId: params.spaceUser.spaceId,
+        userId: params.spaceUser.userId,
+        email: params.spaceUser.email,
+        role: params.spaceUser.role,
+        status: params.spaceUser.status
       }
     })
     return
@@ -56,18 +59,18 @@ export class MediaGateway implements IMediaGateway {
 
   async createPeer(params: {
     spaceId: string
-    spaceMember: SpaceMember
+    spaceUser: SpaceUser
     user: { id: string; name: string; email: string; image: string }
   }): Promise<Room> {
     const res = await this.mediaService.createPeer({
       spaceId: params.spaceId,
-      spaceMember: {
-        id: params.spaceMember.id,
-        spaceId: params.spaceMember.spaceId,
-        userId: params.spaceMember.userId,
-        email: params.spaceMember.email,
-        role: params.spaceMember.role,
-        status: params.spaceMember.status
+      spaceUser: {
+        id: params.spaceUser.id,
+        spaceId: params.spaceUser.spaceId,
+        userId: params.spaceUser.userId,
+        email: params.spaceUser.email,
+        role: params.spaceUser.role,
+        status: params.spaceUser.status
       },
       user: params.user
     })
