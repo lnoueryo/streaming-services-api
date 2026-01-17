@@ -1,7 +1,7 @@
 import {
   createParamDecorator,
   ExecutionContext,
-  ForbiddenException,
+  UnauthorizedException,
   Logger
 } from '@nestjs/common'
 import { auth } from '../../infrastructure/plugins/firebase-admin'
@@ -44,7 +44,7 @@ const authByCookieSession = async (req: any) => {
 const authByAuthorization = async (req: any) => {
   const authHeader = req.headers.authorization
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    throw new ForbiddenException('No token provided')
+    throw new UnauthorizedException('No token provided')
   }
 
   const token = authHeader.split(' ')[1]
@@ -61,6 +61,6 @@ const authByAuthorization = async (req: any) => {
     return user
   } catch (error) {
     Logger.error(error)
-    throw new ForbiddenException('Invalid or expired token')
+    throw new UnauthorizedException('Invalid or expired token')
   }
 }

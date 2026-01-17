@@ -14,7 +14,7 @@ export class MailjetFactory {
   }): Client {
     return new Client({
       apiKey: config.mailjet.apiKeyPublic,
-      apiSecret: config.mailjet.apiKeyPrivate,
+      apiSecret: config.mailjet.apiKeyPrivate
     })
   }
 }

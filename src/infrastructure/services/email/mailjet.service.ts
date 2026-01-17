@@ -42,17 +42,18 @@ export class MailjetService implements IEmailService {
     const result: LibraryResponse<SendEmailV3_1.Response> = await this.mailjet
       .post('send', { version: 'v3.1' })
       .request(data)
-      const message = result.body.Messages[0]
-      console.log('mailjet result', message)
+    const message = result.body.Messages[0]
+    console.log('mailjet result', message)
     return {
       status: message.Status,
       messageId: message.To[0].MessageID,
-      errors: message?.Errors?.map((error) => {
-        return {
-          statusCode: error.StatusCode,
-          message: error.ErrorMessage
-        }
-      }) || []
+      errors:
+        message?.Errors?.map((error) => {
+          return {
+            statusCode: error.StatusCode,
+            message: error.ErrorMessage
+          }
+        }) || []
     }
   }
 }

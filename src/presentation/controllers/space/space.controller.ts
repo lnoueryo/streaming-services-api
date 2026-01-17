@@ -40,7 +40,7 @@ export class SpaceController {
     private readonly getTargetSpaceUseCase: GetTargetSpaceUseCase,
     private readonly enterLobbyUseCase: EnterLobbyUseCase,
     private readonly enableEntryUseCase: EnableEntryUseCase,
-    private readonly inviteSpaceUseCase: InviteSpaceUseCase,
+    private readonly inviteSpaceUseCase: InviteSpaceUseCase
   ) {}
   @Get('/public')
   @ApiResponse({ status: 200, type: Space })

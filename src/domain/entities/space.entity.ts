@@ -39,6 +39,9 @@ export class Space extends BaseEntity {
   getSpaceMemberByEmail(email: string): SpaceMember | undefined {
     return this.spaceMembers.find((member) => member.email === email)
   }
+  getSpaceMemberByUserId(userId: string): SpaceMember | undefined {
+    return this.spaceMembers.find((member) => member.userId === userId)
+  }
   allowMemberToAcceptProtectedInvitation(
     userId: string,
     email: string
