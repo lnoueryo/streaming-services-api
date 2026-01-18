@@ -80,23 +80,23 @@ export class SpaceRepository implements ISpaceRepository {
             where: {
               spaceId_email: {
                 spaceId: params.id,
-                email: member.email,
-              },
+                email: member.email
+              }
             },
             create: {
               id: member.id,
               userId: member.userId,
               email: member.email,
               role: member.role,
-              status: member.status,
+              status: member.status
             },
             update: {
               role: member.role,
-              status: member.status,
-            },
-          })),
-        },
-      },
+              status: member.status
+            }
+          }))
+        }
+      }
     })
     return new Space(space)
   }

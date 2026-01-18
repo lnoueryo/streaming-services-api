@@ -17,8 +17,9 @@ type Config = {
     from: {
       email: string
       name: string
-    },
+    }
   }
+  recordingStorePath: string
 }
 
 if (!process.env.APP_SECRET) {
@@ -54,7 +55,8 @@ const config: Config = {
       email: 'support@jounetsism.biz',
       name: 'Space サポートチーム'
     }
-  }
+  },
+  recordingStorePath: '/srv/media/store/recordings'
 }
 
 type ConfigEnv = {
